@@ -7,7 +7,7 @@ fhandle = open('raw_data/validacijudati08_2021/ValidDati01_08_21.txt',encoding='
 #     break
 # print(fhandle)
 
-conn = sqlite3.connect('raw_data/validacijas.sqlite')
+conn = sqlite3.connect('data/validacijas.sqlite')
 cur = conn.cursor()
 
 cur.execute('''CREATE TABLE IF NOT EXISTS Validacijas
