@@ -119,7 +119,7 @@ try:
             (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             (id, parks_id, tr_veids_id, borta_nr_id,marsr_nos_id, marsrs_id, virziens_id, eTalons_id, laiks ))
             i = i + 1
-            if i == 500:
+            if i == 5000:
                 conn.commit()
                 print('commit')
                 print('sleep for 5 seconds')
