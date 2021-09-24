@@ -126,8 +126,6 @@ try:
                 # time.sleep(5)
                 i = 0
             conn.commit()
-            print('commit')
-
                 
 except KeyboardInterrupt:
     print('\nstopped by user')
