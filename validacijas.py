@@ -122,9 +122,12 @@ try:
             if i == 5000:
                 conn.commit()
                 print('commit')
-                print('sleep for 5 seconds')
-                time.sleep(5)
+                # print('sleep for 5 seconds')
+                # time.sleep(5)
                 i = 0
+            conn.commit()
+            print('commit')
+
                 
 except KeyboardInterrupt:
     print('\nstopped by user')
