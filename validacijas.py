@@ -84,11 +84,11 @@ try:
             eTalons = ride[7]
             laiks = ride[8]
             # Inserting selected data from txt file to sqlite database
-            
+
             cur.execute('INSERT OR IGNORE INTO Parks (parks) VALUES ( ? )', ( parks, ) )
             cur.execute('SELECT id FROM Parks WHERE parks = ? ', (parks, ))
             parks_id = cur.fetchone()[0]
-            
+
             cur.execute('INSERT OR IGNORE INTO Tr_veids (tr_veids) VALUES ( ? )', ( tr_veids, ) )
             cur.execute('SELECT id FROM Tr_veids WHERE tr_veids = ? ', (tr_veids, ))
             tr_veids_id = cur.fetchone()[0]
@@ -119,13 +119,13 @@ try:
             (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             (id, parks_id, tr_veids_id, borta_nr_id,marsr_nos_id, marsrs_id, virziens_id, eTalons_id, laiks ))
             i = i + 1
-            if i == 5000:
+            if i == 50000:
                 conn.commit()
                 print('commit')
                 # print('sleep for 5 seconds')
                 # time.sleep(5)
                 i = 0
-                
+
 except KeyboardInterrupt:
     print('\nstopped by user')
 
