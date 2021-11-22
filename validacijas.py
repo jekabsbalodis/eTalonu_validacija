@@ -3,11 +3,11 @@ import os
 import time
 
 # Create sqlite database to store the data from txt file
-conn = sqlite3.connect('data/validacijas.sqlite')
-cur = conn.cursor()
+validations = sqlite3.connect('data/validacijas.sqlite')
+validationsCur = validations.cursor()
 
 # Create tables for data
-cur.executescript('''
+validationsCur.executescript('''
 
 CREATE TABLE IF NOT EXISTS Validacijas (
     id INTEGER UNIQUE PRIMARY KEY,
@@ -57,13 +57,23 @@ CREATE TABLE IF NOT EXISTS ETalons (
 )
 ''')
 
-# Opening database for file information
-files = sqlite3.connect('data\encoding.sqlite')
+while True:
+    allFiles = sqlite3.connect('data/encoding.sqlite')
+    allFilesCur = allFiles.cursor()
+    allFilesCur.execute(
+        'SELECT name, encoding, times_read FROM Files JOIN Encodings USING (encoding_id) WHERE times_read = 0')
+    file = allFilesCur.fetchone()
+    if file == None:
+        print('All the files have been read')
+        break
+    name = file[0]
+    encoding = file[1]
+    times_read = int(file[2])
 
-# Opening individual files
-try:
-    for file in allfiles:
-        fhandle = open(file, encoding='Windows 1257')
+    # Opening individual files
+    try:
+        path = 'raw_data/' + name
+        fhandle = open(path, encoding=encoding)
 
         i = 0
         for line in fhandle:  # Reading the file line for line and selecting necessary data
@@ -82,61 +92,68 @@ try:
             laiks = ride[8]
 
             # Inserting selected data from txt file to sqlite database
-            cur.execute(
+            validationsCur.execute(
                 'INSERT OR IGNORE INTO Parks (parks) VALUES ( ? )', (parks, ))
-            cur.execute('SELECT id FROM Parks WHERE parks = ? ', (parks, ))
-            parks_id = cur.fetchone()[0]
+            validationsCur.execute(
+                'SELECT id FROM Parks WHERE parks = ? ', (parks, ))
+            parks_id = validationsCur.fetchone()[0]
 
-            cur.execute(
+            validationsCur.execute(
                 'INSERT OR IGNORE INTO Tr_veids (tr_veids) VALUES ( ? )', (tr_veids, ))
-            cur.execute(
+            validationsCur.execute(
                 'SELECT id FROM Tr_veids WHERE tr_veids = ? ', (tr_veids, ))
-            tr_veids_id = cur.fetchone()[0]
+            tr_veids_id = validationsCur.fetchone()[0]
 
-            cur.execute(
+            validationsCur.execute(
                 'INSERT OR IGNORE INTO Borta_nr (borta_nr) VALUES ( ? )', (borta_nr, ))
-            cur.execute(
+            validationsCur.execute(
                 'SELECT id FROM Borta_nr WHERE borta_nr = ? ', (borta_nr, ))
-            borta_nr_id = cur.fetchone()[0]
+            borta_nr_id = validationsCur.fetchone()[0]
 
-            cur.execute(
+            validationsCur.execute(
                 'INSERT OR IGNORE INTO Marsruta_nos (marsruta_nos) VALUES ( ? )', (marsr_nos, ))
-            cur.execute(
+            validationsCur.execute(
                 'SELECT id FROM Marsruta_nos WHERE marsruta_nos = ? ', (marsr_nos, ))
-            marsr_nos_id = cur.fetchone()[0]
+            marsr_nos_id = validationsCur.fetchone()[0]
 
-            cur.execute(
+            validationsCur.execute(
                 'INSERT OR IGNORE INTO Marsruts (marsruts) VALUES ( ? )', (marsr, ))
-            cur.execute(
+            validationsCur.execute(
                 'SELECT id FROM Marsruts WHERE marsruts = ? ', (marsr, ))
-            marsrs_id = cur.fetchone()[0]
+            marsrs_id = validationsCur.fetchone()[0]
 
-            cur.execute(
+            validationsCur.execute(
                 'INSERT OR IGNORE INTO Virziens (virziens) VALUES ( ? )', (virziens, ))
-            cur.execute(
+            validationsCur.execute(
                 'SELECT id FROM Virziens WHERE virziens = ? ', (virziens, ))
-            virziens_id = cur.fetchone()[0]
+            virziens_id = validationsCur.fetchone()[0]
 
-            cur.execute(
+            validationsCur.execute(
                 'INSERT OR IGNORE INTO ETalons (eTalons) VALUES ( ? )', (eTalons, ))
-            cur.execute(
+            validationsCur.execute(
                 'SELECT id FROM ETalons WHERE eTalons = ? ', (eTalons, ))
-            eTalons_id = cur.fetchone()[0]
+            eTalons_id = validationsCur.fetchone()[0]
 
-            cur.execute('''INSERT OR IGNORE INTO Validacijas
+            validationsCur.execute('''INSERT OR IGNORE INTO Validacijas
             (id, parks_id, tr_veids_id, borta_nr_id, marsruta_nos_id, marsruts_id, virziens_id, etalons_id, laiks)
             VALUES
             (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                        (id, parks_id, tr_veids_id, borta_nr_id, marsr_nos_id, marsrs_id, virziens_id, eTalons_id, laiks))
+                                   (id, parks_id, tr_veids_id, borta_nr_id, marsr_nos_id, marsrs_id, virziens_id, eTalons_id, laiks))
             i = i + 1
+
             if i == 50000:
-                conn.commit()
+                validations.commit()
                 print('commit')
                 print('sleep for 5 seconds')
                 time.sleep(5)
                 i = 0
+        allFilesCur.execute(
+            'UPDATE Files SET times_read = ? WHERE name = ?', (times_read + 1, name,))
+        allFiles.commit()
 
-except KeyboardInterrupt:
-    print('\nstopped by user')
+    except KeyboardInterrupt:
+        print('\nstopped by user')
+        break
 
-conn.commit()
+validations.commit()
+allFiles.commit()
