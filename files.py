@@ -1,7 +1,9 @@
 import sqlite3
 import os
 import time
-import chardet
+from chardet.universaldetector import UniversalDetector
+
+detector = UniversalDetector()
 
 # Create database for storing information about file encodings
 conn = sqlite3.connect('data/encoding.sqlite')
@@ -22,14 +24,21 @@ CREATE TABLE IF NOT EXISTS Encodings (
 ''')
 
 # Writing information to database
+i = 0
 for paths, dirs, files in os.walk('raw_data'):
-    i = 0
     for file in files:
         if file.startswith('.'):
             continue
         filePath = os.path.join(paths, file)
-        with open(filePath) as openFile:
-            encoding = openFile.encoding
+        detector.reset()
+        with open(filePath, 'rb') as openFile:
+            for line in openFile:
+                detector.feed(line)
+                if detector.done:
+                    break
+            detector.close()
+            encoding = detector.result['encoding']
+        print(encoding)
         cur.execute('SELECT name FROM Files WHERE name = ?', (file,))
         check = cur.fetchone()
         if check:
@@ -53,7 +62,3 @@ for paths, dirs, files in os.walk('raw_data'):
             i = 0
 conn.commit()
 conn.close()
-
-
-
-# Testing
