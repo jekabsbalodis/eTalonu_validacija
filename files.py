@@ -53,3 +53,7 @@ for paths, dirs, files in os.walk('raw_data'):
             i = 0
 conn.commit()
 conn.close()
+
+
+
+# Testing
