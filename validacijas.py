@@ -138,7 +138,15 @@ while True:
             (id, parks_id, tr_veids_id, borta_nr_id, marsruta_nos_id, marsruts_id, virziens_id, etalons_id, laiks)
             VALUES
             (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                                   (id, parks_id, tr_veids_id, borta_nr_id, marsr_nos_id, marsrs_id, virziens_id, eTalons_id, laiks))
+                                   (id,
+                                    parks_id,
+                                    tr_veids_id,
+                                    borta_nr_id,
+                                    marsr_nos_id,
+                                    marsrs_id,
+                                    virziens_id,
+                                    eTalons_id,
+                                    laiks))
             i = i + 1
 
             if i == 50000:
