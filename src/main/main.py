@@ -1,3 +1,3 @@
-import models.Menu
+from models.Menu import printMenu
 
-menu = models.Menu.printMenu()
+printMenu()
