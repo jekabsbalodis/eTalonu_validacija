@@ -3,3 +3,5 @@
 .DS_Store
 test.py
 .vscode/
+eTalonuValidacijaVenv/
+**/__pycache__/
