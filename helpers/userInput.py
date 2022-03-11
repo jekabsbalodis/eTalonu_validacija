@@ -4,7 +4,7 @@ from helpers.constants import INT_INPUT_ERROR
 def stringInput(message):
     userInput = str(input(message))
     if userInput == '':
-        stringInput(message)
+        return stringInput(message)
     else:
         return userInput
 
@@ -16,4 +16,4 @@ def intInput(message):
         return userInputAsInt
     except:
         print(INT_INPUT_ERROR)
-        intInput(message)
+        return intInput(message)
