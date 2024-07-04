@@ -8,6 +8,7 @@ python-dotenv = "*"
 flask = "*"
 bootstrap-flask = "*"
 flask-migrate = "*"
+pandas = "*"
 
 [dev-packages]
 
