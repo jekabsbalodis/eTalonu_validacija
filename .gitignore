@@ -166,6 +166,7 @@ cython_debug/
 
 # sqlite
 *.sqlite
+*.sqlite.bak
 
 # txt data
 ValidDati*

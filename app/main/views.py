@@ -1,13 +1,17 @@
 '''View functions for start page'''
 from flask import render_template
+from sqlalchemy import text
+from app import db
 from . import main
-from ..models import Validacijas
 
 
 @main.route('/', methods=['GET'])
 def index():
     '''View function for start page'''
-    validacijas = Validacijas.query.filter_by(talona_id = 3673304).all()
-    for validacija in validacijas:
-        print(validacija.transp_veids)
-    return render_template('index.html.jinja', validacijas=validacijas)
+    query = db.session.execute(text('''SELECT marsruts, COUNT(*) AS count
+                                            FROM validacijas
+                                            GROUP BY marsruts
+                                            ORDER BY count DESC
+                                            LIMIT 10;'''))
+    results = query.all()
+    return render_template('index.html.jinja', results=results)
