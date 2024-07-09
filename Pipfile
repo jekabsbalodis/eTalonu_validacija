@@ -7,8 +7,8 @@ name = "pypi"
 python-dotenv = "*"
 flask = "*"
 bootstrap-flask = "*"
-flask-migrate = "*"
 pandas = "*"
+peewee = "*"
 
 [dev-packages]
 
