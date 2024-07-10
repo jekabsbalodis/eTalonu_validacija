@@ -1,45 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Mars Route Popularity</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/charts.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Most Popular Mars Routes</h1>
-    <canvas id="marsRouteChart"></canvas>
+    <div style="width: 75%; margin: auto;">
+        <canvas id="myChart"></canvas>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"></script>
     <script>
-        var ctx = document.getElementById('marsRouteChart').getContext('2d');
-        var chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: [], // Placeholder for route names
-                datasets: [{
-                    label: 'Number of Validations',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    data: []  // Placeholder for validation counts
-                }]
-            },
-            options: {
-                scales: {
-                    yAxes: [{
-                        ticks: {
+        document.addEventListener("DOMContentLoaded", function () {
+            const ctx = document.getElementById('myChart').getContext('2d');
+
+            // Prepare data
+            const labels = {{ results|map(attribute=0)|list|tojson }};
+            const data = {{ results|map(attribute=1)|list|tojson }};
+
+            // Create chart
+            const myChart = new Chart(ctx, {
+                type: 'bar', // or 'line', 'pie', etc.
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '# of Validations',
+                        data: data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
                             beginAtZero: true
                         }
-                    }]
+                    }
                 }
-            }
+            });
         });
-
-        // Update chart data with Flask-provided values
-        var routeLabels = {{ results|map(attribute='marsruts')|list }};
-        var validationCounts = {{ results|map(attribute='count')|list }};
-
-        chart.data.labels = routeLabels;
-        chart.data.datasets[0].data = validationCounts;
-        chart.update();
     </script>
 </body>
 </html>
