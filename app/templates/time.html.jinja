@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Counts</title>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add your CSS here -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #chart-container {
+            width: 80%;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Count of Validacijas by Hour</h1>
+    <div id="chart-container">
+        <canvas id="hourlyCountsChart"></canvas>
+    </div>
+    
+    <!-- JavaScript to render the chart -->
+    <script>
+        // Extract the data passed from Flask view
+        const results = {{ results|tojson }};
+
+        // Separate the data into hours and counts arrays
+        const hours = results.map(result => result[0]);
+        const counts = results.map(result => result[1]);
+
+        // Get the context of the canvas element we want to select
+        const ctx = document.getElementById('hourlyCountsChart').getContext('2d');
+
+        // Create the bar chart
+        const hourlyCountsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: hours,
+                datasets: [{
+                    label: 'Count of Validacijas',
+                    data: counts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
