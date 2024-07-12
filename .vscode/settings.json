@@ -1,0 +1,6 @@
+{
+    "python.terminal.activateEnvironment": false,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.importFormat": "absolute"
+}
