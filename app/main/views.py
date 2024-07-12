@@ -41,7 +41,7 @@ def index():
     #                                         LIMIT 10;'''))
     # results = query.all()
     print(type(query))
-    return render_template('index.html.jinja', results=results)
+    return render_template('index.jinja', results=results)
 
 
 @main.route('/times', methods=['GET'])
@@ -58,4 +58,4 @@ def times():
     for result in results:  # Debugging output
         print(f"Hour: {result[0]}, Count: {result[1]}")
 
-    return render_template('time.html.jinja', results=results)
+    return render_template('time.jinja', results=results)
