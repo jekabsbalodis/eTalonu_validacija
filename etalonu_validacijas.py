@@ -1,3 +1,9 @@
+'''
+Flask app for eTalons validation data display.
+Creates CLI commands for
+- DB Table creation (flask create-tables) and
+- data loading (flask load-data <data_path> <encoding>).
+'''
 import os
 from dotenv import load_dotenv
 
@@ -17,6 +23,7 @@ app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
 @app.shell_context_processor
 def make_shell_context():
+    '''Add object to flask shell context.'''
     return {'db': sqlite_db,
             'Validacijas': Validacijas,
             'Parks': Parks,
@@ -27,7 +34,8 @@ def make_shell_context():
 
 
 @app.cli.command(name='create-tables')
-def createTables():
+def create_tables():
+    '''Create database tables.'''
     sqlite_db.connect(reuse_if_open=True)
     sqlite_db.create_tables(
         [Parks, Transports, GarNr, Marsruts, Talons, Validacijas])
@@ -37,13 +45,13 @@ def createTables():
 @app.cli.command('load-data')
 @click.argument('data_path', type=click.Path(exists=True))
 @click.argument('encoding')
-def loadData(data_path, encoding):
+def load_data(data_path: str, encoding: str):
     '''Load data from a CSV file into the database.'''
-    # pylint: disable=wrong-import-position
-    from peewee import chunked, DoesNotExist
-    import glob
+    # pylint: disable=import-outside-toplevel
     from datetime import datetime
-    # pylint: enable=wrong-import-position
+    import glob
+    from peewee import chunked, DoesNotExist
+    # pylint: enable=import-outside-toplevel
     sqlite_db.connect(reuse_if_open=True)
     col_names: list[str] = ['id', 'parks', 'transports', 'gar',
                             'mars_nos', 'marsruts', 'virziens', 'talons', 'laiks']
@@ -81,7 +89,7 @@ def loadData(data_path, encoding):
         Marsruts.insert_many(df_marsruts_dict).on_conflict_ignore().execute()
     with sqlite_db.atomic():
         Talons.insert_many(df_talons_dict).on_conflict_ignore().execute()
-    validacijas = []
+    validacijas: list[dict] = []
     for row in df.itertuples():
         def virziens(a, b):
             return a == b
