@@ -1,5 +1,5 @@
 '''View functions for start page'''
-from flask import render_template
+from flask import render_template, redirect, session, request
 from peewee import JOIN, fn
 from app.models import sqlite_db, Validacijas, Marsruts
 from . import main
@@ -16,9 +16,25 @@ def _db_close(exc):
         sqlite_db.close()
 
 
+@main.get("/toggle-theme")
+def toggle_theme():
+    current_theme = session.get("theme")
+    if current_theme == "dark":
+        session["theme"] = "light"
+    else:
+        session["theme"] = "dark"
+    return redirect(request.args.get("current_page") or '/')
+
+
 @main.route('/', methods=['GET'])
 def index():
-    '''View function for start page'''
+    '''View function for the start page of the app'''
+    return render_template('index.jinja')
+
+
+@main.route('/routes', methods=['GET'])
+def routes():
+    '''View function for routes page'''
     query = Validacijas.select(
         Marsruts.marsruts, fn.COUNT(Validacijas.id).alias('count')
     ).join(
@@ -41,11 +57,12 @@ def index():
     #                                         LIMIT 10;'''))
     # results = query.all()
     print(type(query))
-    return render_template('index.jinja', results=results)
+    return render_template('routes.jinja', results=results)
 
 
 @main.route('/times', methods=['GET'])
 def times():
+    '''View function for times page'''
     query = (Validacijas
              .select(
                  Validacijas.laiks.hour.alias('hour'),

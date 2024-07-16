@@ -1,0 +1,53 @@
+{% extends "base.jinja" %}
+
+{% block page_content %}
+<div style="width: 75%; margin: auto;">
+    <canvas id="myChart"></canvas>
+</div>
+{% endblock page_content %}
+{% block scripts -%}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM loaded");
+        const ctx = document.getElementById('myChart');
+        if (!ctx) {
+            console.error("Canvas element not found");
+            return;
+        }
+
+        const labels = {{ results| map(attribute = 0) | list | tojson
+    }};
+    const data = {{ results| map(attribute = 1) | list | tojson }};
+
+    console.log("Labels:", labels);
+    console.log("Data:", data);
+
+    try {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '# of Validations',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        console.log("Chart created successfully");
+    } catch (error) {
+        console.error("Error creating chart:", error);
+    }
+    });
+</script>
+{% endblock scripts %}
