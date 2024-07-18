@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 python-dotenv = "*"
 flask = "*"
-bootstrap-flask = "*"
 pandas = "*"
 peewee = "*"
 
