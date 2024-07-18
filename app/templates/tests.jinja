@@ -1,0 +1,43 @@
+<div id="new">
+    <div style="width: 75%; margin: auto;">
+        <canvas id="myChart"></canvas>
+    </div>
+    
+    <script>
+        document.addEventListener('htmx:afterRequest', function () {
+            // Existing script goes here
+            // Extract the data passed from Flask view
+            const results = {{ results| tojson
+        }};
+    
+        // Separate the data into hours and counts arrays
+        const hours = results.map(result => result[0]);
+        const counts = results.map(result => result[1]);
+    
+        // Get the context of the canvas element we want to select
+        const ctx = document.getElementById('myChart').getContext('2d');
+    
+        // Create the bar chart
+        const hourlyCountsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: hours,
+                datasets: [{
+                    label: 'Count of Validacijas',
+                    data: counts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+    </script>
+</div>

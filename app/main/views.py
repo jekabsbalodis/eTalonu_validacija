@@ -30,6 +30,21 @@ def toggle_theme():
     return redirect(request.args.get("current_page") or '/')
 
 
+@main.get("/tests")
+def tests():
+    '''htmx test'''
+    query = (Validacijas
+             .select(
+                 Validacijas.laiks.hour.alias('hour'),
+                 fn.COUNT(Validacijas.id).alias('count')
+             ).where(Marsruts.marsruts == 'Tm 7')
+             .join(Marsruts, JOIN.LEFT_OUTER).group_by(Validacijas.laiks.hour))
+
+    results = [(result.hour, result.count) for result in query]
+
+    return render_template('tests.jinja', results=results)
+
+
 @main.route('/', methods=['GET'])
 def index():
     '''Render the start page of the app'''
