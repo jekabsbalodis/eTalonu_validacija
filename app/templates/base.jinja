@@ -27,6 +27,11 @@
   <script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"
     integrity="sha512-ytM6hP1K9BkRTjUQZpxZKFjJ2TvE4QXaK7phVymsm7NimaI5H09TWWW6f2JMbonLp4ftYU6xfwQGoe3C8jta9A=="
     crossorigin="anonymous" defer></script>
+  <style>
+    [x-cloak] {
+      display: none !important;
+    }
+  </style>
   <title>
     {% block title %}
     {% endblock title %}
@@ -39,7 +44,7 @@
     <div class="container-fluid" x-data="{ showSpinner: false }">
       <a class="navbar-brand" href="{{ url_for('main.index') }}" @click="showSpinner = true">
         eTalonu validācijas
-        <div id="spinner" class="spinner-grow spinner-grow-sm" role="status" x-show="showSpinner"><span
+        <div id="spinner" class="spinner-grow spinner-grow-sm" role="status" x-cloak x-show="showSpinner"><span
             class="visually-hidden">Loading...</span></div>
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
@@ -49,7 +54,7 @@
       <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
         <div class="offcanvas-header">
           <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Izvēlne <div id="spinner"
-              class="spinner-grow spinner-grow-sm" role="status" x-show="showSpinner"><span
+              class="spinner-grow spinner-grow-sm" role="status" x-cloak x-show="showSpinner"><span
                 class="visually-hidden">Loading...</span></div>
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
