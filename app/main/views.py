@@ -2,7 +2,7 @@
 Main routes and view functions for the Flask application.
 Includes database connection management and theme toggling
 '''
-from flask import render_template, redirect, session, request, url_for
+from flask import render_template, redirect, session, request
 from peewee import JOIN, fn
 from app.models import sqlite_db, Validacijas, Marsruts
 from . import main
