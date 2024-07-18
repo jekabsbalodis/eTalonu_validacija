@@ -1,5 +1,16 @@
 {% extends "base.jinja" %}
 
+{% block title %}
+eTalonu validācijas - Populārākie maršruti
+{% endblock title %}
+
+{% block head %}
+{{ super() }}
+<script src="https://unpkg.com/chart.js@4.4.3/dist/chart.umd.js"
+    integrity="sha512-LUpacDQOhzI4MVomIbJOUbdKypLvklsznjLrjD9GwzynjSlF7qLy112SzTw+ZWJPxhBvNRLGGdW/7E1slOvsFA=="
+    crossorigin="anonymous" defer></script>
+{% endblock head %}
+
 {% block page_content %}
 <div style="width: 75%; margin: auto;">
     <canvas id="myChart"></canvas>
