@@ -45,7 +45,7 @@ def create_tables():
 @app.cli.command('load-data')
 @click.argument('data_path', type=click.Path(exists=True))
 @click.argument('encoding')
-def load_data(data_path: str, encoding: str):
+def load_data(data_path: str, file_encoding: str):
     '''Load data from a CSV file into the database.'''
     # pylint: disable=import-outside-toplevel
     from datetime import datetime
@@ -57,7 +57,7 @@ def load_data(data_path: str, encoding: str):
                             'mars_nos', 'marsruts', 'virziens', 'talons', 'laiks']
     datetime_format = '%d.%m.%Y %H:%M:%S'
     if os.path.isfile(data_path):
-        df = pd.read_csv(data_path, encoding=encoding,
+        df = pd.read_csv(data_path, encoding=file_encoding,
                          header=0, names=col_names)
     else:
         files = glob.glob(os.path.join(data_path, "ValidDati*"))
@@ -66,7 +66,7 @@ def load_data(data_path: str, encoding: str):
         df = pd.DataFrame()
         for file in files:
             df = pd.concat(
-                [df, pd.read_csv(file, encoding=encoding, header=0, names=col_names)])
+                [df, pd.read_csv(file, encoding=file_encoding, header=0, names=col_names)])
     df_parks = df['parks'].to_frame().drop_duplicates()
     df_parks_dict = df_parks.to_dict(orient='records')
     df_transports = df['transports'].to_frame().drop_duplicates()
