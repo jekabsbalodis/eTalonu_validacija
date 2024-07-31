@@ -37,10 +37,18 @@
 
 <body>
   <nav class="container navbar navbar-expand-md">
-    <div class="container-fluid" x-data="{ showSpinner: false }">
+    <div class="container-fluid" x-data="{ showSpinner: false, isMdOrSmaller: window.innerWidth < 768 }" x-init="$watch('showSpinner', () => {
+        if (showSpinner) {
+            const updateisMdOrSmaller = () => {
+                isMdOrSmaller = window.innerWidth < 768;
+            };
+            window.addEventListener('resize', updateisMdOrSmaller);
+            updateisMdOrSmaller();
+        }
+    })">
       <a class="navbar-brand" href="{{ url_for('main.index') }}" @click="showSpinner = true">
         eTalonu validācijas
-        <div id="spinner" class="spinner-grow spinner-grow-sm" role="status" x-cloak x-show="showSpinner"><span
+        <div id="spinner" class="spinner-grow spinner-grow-sm" role="status" x-cloak x-show="showSpinner" :class="{ 'd-none': isMdOrSmaller }"><span
             class="visually-hidden">Loading...</span></div>
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
