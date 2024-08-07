@@ -86,7 +86,7 @@
               <a class="nav-link" href="{{ url_for('main.toggle_theme', current_page=request.path) }}"
                 @click="showSpinner = true">
                 {% if session.get('theme') == "dark" %}
-                ☀️ <span class="d-md-none">Gaišais motīvs</span>
+                ☀️<span class="d-md-none">Gaišais motīvs</span>
                 {% else %}
                 🌑<span class="d-md-none">Tumšais motīvs</span>
                 {% endif %}
