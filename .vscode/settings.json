@@ -2,5 +2,6 @@
     "python.terminal.activateEnvironment": false,
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.autoImportCompletions": true,
-    "python.analysis.importFormat": "absolute"
+    "python.analysis.importFormat": "absolute",
+    "emmet.includeLanguages": {"jinja-html": "html"}
 }

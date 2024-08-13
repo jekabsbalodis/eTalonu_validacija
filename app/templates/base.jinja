@@ -28,10 +28,8 @@
       display: none !important;
     }
   </style>
-  <title>
-    {% block title %}
-    {% endblock title %}
-  </title>
+  {% block title %}
+  {% endblock title %}
   {% endblock head %}
 </head>
 
@@ -48,8 +46,8 @@
     })">
       <a class="navbar-brand" href="{{ url_for('main.index') }}" @click="showSpinner = true">
         eTalonu validācijas
-        <div id="spinner" class="spinner-grow spinner-grow-sm" role="status" x-cloak x-show="showSpinner" :class="{ 'd-none': isMdOrSmaller }"><span
-            class="visually-hidden">Loading...</span></div>
+        <div id="spinner" class="spinner-grow spinner-grow-sm" role="status" x-cloak x-show="showSpinner"
+          :class="{ 'd-none': isMdOrSmaller }"><span class="visually-hidden">Loading...</span></div>
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
         aria-controls="offcanvasNavbar">
@@ -103,7 +101,6 @@
   </main>
   {% block scripts %}
   {% endblock scripts %}
-
 </body>
 
 </html>

@@ -2,7 +2,7 @@
 Main routes and view functions for the Flask application.
 Includes database connection management and theme toggling
 '''
-from flask import render_template, redirect, session, request
+from flask import jsonify, render_template, redirect, session, request
 from peewee import JOIN, fn
 from app.models import sqlite_db, Validacijas, Marsruts
 from . import main
@@ -28,21 +28,6 @@ def toggle_theme():
     else:
         session["theme"] = "dark"
     return redirect(request.args.get("current_page") or '/')
-
-
-@main.get("/tests")
-def tests():
-    '''htmx test'''
-    query = (Validacijas
-             .select(
-                 Validacijas.laiks.hour.alias('hour'),
-                 fn.COUNT(Validacijas.id).alias('count')
-             ).where(Marsruts.marsruts == 'Tm 7')
-             .join(Marsruts, JOIN.LEFT_OUTER).group_by(Validacijas.laiks.hour))
-
-    results = [(result.hour, result.count) for result in query]
-
-    return render_template('tests.jinja', results=results)
 
 
 @main.route('/', methods=['GET'])
@@ -71,13 +56,26 @@ def routes():
 @main.route('/times', methods=['GET'])
 def times():
     '''Render the page with statistics of hours when public transportation is used the most'''
+    return render_template('time.jinja')
+
+
+@main.get("/times/get")
+def get_times():
+    '''Get data for times page'''
+    route = request.args.get('param1')
+
+    results = [(hour, 0) for hour in range(24)]
+
     query = (Validacijas
              .select(
                  Validacijas.laiks.hour.alias('hour'),
-                 fn.COUNT(Validacijas.id).alias('count')
-             )
+                 fn.COUNT(Validacijas.id).alias('count'))
              .join(Marsruts, JOIN.LEFT_OUTER).group_by(Validacijas.laiks.hour))
 
-    results = [(result.hour, result.count) for result in query]
+    if route:
+        query = query.where(Marsruts.marsruts == route)
 
-    return render_template('time.jinja', results=results)
+    for result in query:
+        results[result.hour] = (result.hour, result.count)
+
+    return jsonify(results)

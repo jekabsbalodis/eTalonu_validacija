@@ -1,7 +1,7 @@
 {% extends "base.jinja" %}
 
 {% block title %}
-eTalonu validācijas - Braucieni stundā
+<title>eTalonu validācijas - Braucieni stundā</title>
 {% endblock title %}
 
 {% block head %}
@@ -9,70 +9,90 @@ eTalonu validācijas - Braucieni stundā
 <script src="https://unpkg.com/chart.js@4.4.3/dist/chart.umd.js"
   integrity="sha512-LUpacDQOhzI4MVomIbJOUbdKypLvklsznjLrjD9GwzynjSlF7qLy112SzTw+ZWJPxhBvNRLGGdW/7E1slOvsFA=="
   crossorigin="anonymous" defer></script>
-<script src="https://unpkg.com/htmx.org@2.0.1/dist/htmx.min.js"
-  integrity="sha512-/POjPSnGjDaJfmt9O7LOTz1eGoCQNsVSJdgxYTVjhnWRDmuDFTvzwQrxIxipRrakLw7IYJfOsanDe7WuP40zxw=="
-  crossorigin="anonymous" defer></script>
 {% endblock head %}
 
 {% block page_content %}
-<button id="test_button" type="button" class="btn btn-primary" hx-get="/tests" hx-target="#replace">press me</button>
-<div id="replace">
+<div x-data="chart_data">
+  <div>
+    <label for="param1">Param1:</label>
+    <input type="text" id="param1" x-model="param1">
+  </div>
+  <button id="test_button" type="submit" class="btn btn-primary" :disabled="loading" @click="fetchNewData">
+    <template x-if="loading">
+      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+      <span class="visually-hidden">Loading...</span>
+    </template>
+    <template x-if="!loading">
+      <span>Press Me</span>
+    </template>
+  </button>
   <div style="width: 75%; margin: auto;">
     <canvas id="myChart"></canvas>
   </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      // Existing script goes here
-      // Extract the data passed from Flask view
-      const results = {{ results| tojson
-    }};
-
-    // Separate the data into hours and counts arrays
-    const hours = results.map(result => result[0]);
-    const counts = results.map(result => result[1]);
-
-    // Get the context of the canvas element we want to select
-    const ctx = document.getElementById('myChart').getContext('2d');
-
-    // Create the bar chart
-    const hourlyCountsChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: hours,
-        datasets: [{
-          label: 'Count of Validacijas',
-          data: counts,
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          borderColor: 'rgba(75, 192, 192, 1)',
-          borderWidth: 1
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-  });
-  </script>
 </div>
-
 {% endblock page_content %}
 {% block scripts %}
 <script>
-  document.addEventListener('htmx:beforeRequest', function (event) {
-    var button = document.querySelector('#test_button');
-    button.disabled = true;
-    button.innerHTML = '  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span><span class="visually-hidden">Loading...</span>';
-  });
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('chart_data', () => ({
+      loading: false,
+      data: [],
+      chart: null,
+      param1: '',
+      maxObservedCount: 0,
 
-  document.addEventListener('htmx:afterRequest', function (event) {
-    var button = document.querySelector('#test_button');
-    button.disabled = false;
-    button.innerHTML = 'Press Me';
+      async init() {
+        const response = await fetch('{{ url_for('main.get_times') }}');
+        this.data = await response.json();
+        this.renderChart(this.data)
+      },
+
+      renderChart(chart_data) {
+        const hours = chart_data.map(i => i[0]);
+        const counts = chart_data.map(i => i[1]);
+        const maxCount = Math.max(...counts);
+        if (maxCount > this.maxObservedCount) {
+          this.maxObservedCount = maxCount;
+        }
+        const ctx = document.getElementById('myChart').getContext('2d');
+
+        if (this.chart) {
+          this.chart.destroy();
+        }
+
+        this.chart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: hours,
+            datasets: [{
+              label: 'Count of Validacijas',
+              data: counts,
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: this.maxObservedCount + 10
+              }
+            }
+          }
+        });
+      },
+
+      async fetchNewData() {
+        this.loading = true;
+        const params = new URLSearchParams({ param1: this.param1 });
+        const response = await fetch('{{ url_for('main.get_times') }}'.concat("?", params));
+        this.data = await response.json();
+        this.renderChart(this.data);
+        this.loading = false;
+      },
+
+    }));
   });
 </script>
 {% endblock scripts %}
