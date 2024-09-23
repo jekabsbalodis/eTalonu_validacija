@@ -2,7 +2,7 @@
 Main routes and view functions for the Flask application.
 Includes database connection management and theme toggling
 '''
-from flask import jsonify, render_template, redirect, session, request
+from flask import jsonify, render_template, redirect, session, request, url_for
 from peewee import JOIN, fn
 from app.models import sqlite_db, Validacijas, Marsruts
 from . import main
@@ -39,14 +39,15 @@ def index():
 @main.route('/routes', methods=['GET'])
 def routes():
     '''Render the page with statistics of most used routes'''
-    query = Validacijas.select(
-        Marsruts.marsruts, fn.COUNT(Validacijas.id).alias('count')
-    ).join(
-        Marsruts, JOIN.LEFT_OUTER
-    ).group_by(
-        Marsruts.marsruts
-    ).order_by(
-        fn.COUNT(Validacijas.id).desc())
+    query = (Validacijas.
+             select(
+                 Marsruts.marsruts, fn.COUNT(Validacijas.id).alias('count')
+             ).join(
+                 Marsruts, JOIN.LEFT_OUTER
+             ).group_by(
+                 Marsruts.marsruts
+             ).order_by(
+                 fn.COUNT(Validacijas.id).desc()))
 
     results = [(result.marsruts_id.marsruts, result.count) for result in query]
 
@@ -56,26 +57,42 @@ def routes():
 @main.route('/times', methods=['GET'])
 def times():
     '''Render the page with statistics of hours when public transportation is used the most'''
-    return render_template('time.jinja')
+    data_url = url_for('main.times_data')
+    return render_template('time.jinja', data_url=data_url)
 
 
-@main.get("/times/get")
-def get_times():
+@main.get("/times_data")
+def times_data():
     '''Get data for times page'''
-    route = request.args.get('param1')
+    results = []
 
-    results = [(hour, 0) for hour in range(24)]
-
-    query = (Validacijas
-             .select(
-                 Validacijas.laiks.hour.alias('hour'),
-                 fn.COUNT(Validacijas.id).alias('count'))
-             .join(Marsruts, JOIN.LEFT_OUTER).group_by(Validacijas.laiks.hour))
-
-    if route:
-        query = query.where(Marsruts.marsruts == route)
+    query = (Validacijas.
+             select(
+                 Marsruts.marsruts.alias('route'),
+                 fn.COUNT(Validacijas.id).alias('count'),
+                 Validacijas.laiks.hour.alias('hour')).
+             join(
+                 Marsruts, JOIN.LEFT_OUTER).
+             group_by(
+                 Validacijas.laiks.hour, Marsruts.marsruts))
 
     for result in query:
-        results[result.hour] = (result.hour, result.count)
+        route = result.marsruts_id.route
+        hour = result.hour
+        count = result.count
+        route_dict = {"route": route,
+                      "validations": {hour: count}}
+
+        existing_route = next(
+            (r for r in results if r["route"] == route), None)
+        if existing_route:
+            existing_route["validations"][hour] = count
+        else:
+            results.append(route_dict)
+
+    for route_dict in results:
+        for hour in range(24):
+            if hour not in route_dict["validations"]:
+                route_dict["validations"][hour] = 0
 
     return jsonify(results)

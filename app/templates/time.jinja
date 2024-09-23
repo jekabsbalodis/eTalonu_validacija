@@ -13,20 +13,15 @@
 
 {% block page_content %}
 <div x-data="chart_data">
-  <div>
-    <label for="param1">Param1:</label>
-    <input type="text" id="param1" x-model="param1">
-  </div>
-  <button id="test_button" type="submit" class="btn btn-primary" :disabled="loading" @click="fetchNewData">
-    <template x-if="loading">
-      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-      <span class="visually-hidden">Loading...</span>
-    </template>
-    <template x-if="!loading">
-      <span>Press Me</span>
-    </template>
-  </button>
   <div style="width: 75%; margin: auto;">
+    <label for="routeSelect">Select Route: </label>
+    <select id="routeSelect" x-on:change="onRouteChange">
+      <option value="all">All Routes</option>
+      <template x-for="route in allData">
+        <option :value="route.route" x-text="route.route"></option>
+      </template>
+    </select>
+
     <canvas id="myChart"></canvas>
   </div>
 </div>
@@ -35,26 +30,52 @@
 <script>
   document.addEventListener('alpine:init', () => {
     Alpine.data('chart_data', () => ({
-      loading: false,
-      data: [],
       chart: null,
-      param1: '',
+      allData: [],
+      filteredData: [],
+      selectedRoute: 'all',
       maxObservedCount: 0,
 
-      async init() {
-        const response = await fetch('{{ url_for('main.get_times') }}');
-        this.data = await response.json();
-        this.renderChart(this.data)
+      init() {
+        fetch("{{ data_url }}")
+          .then(response => response.json())
+          .then(data => {
+            this.allData = data;
+            this.filteredData = this.aggregateData(data);
+            this.renderChart();
+          })
+          .catch(error => console.error('Error fetching the data:', error));
       },
 
-      renderChart(chart_data) {
-        const hours = chart_data.map(i => i[0]);
-        const counts = chart_data.map(i => i[1]);
-        const maxCount = Math.max(...counts);
-        if (maxCount > this.maxObservedCount) {
-          this.maxObservedCount = maxCount;
+      aggregateData(data) {
+        const aggregated = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 21: 0, 22: 0, 23: 0 };
+
+        data.forEach(routeData => {
+          Object.entries(routeData.validations).forEach(([hour, count]) => {
+            aggregated[hour] += count;
+          });
+        });
+
+        return aggregated;
+      },
+
+      filterDataByRoute(route) {
+        if (route === 'all') {
+          return this.aggregateData(this.allData);
         }
+
+        const routeData = this.allData.find(r => r.route === route);
+        return routeData ? routeData.validations : {};
+      },
+
+      renderChart() {
         const ctx = document.getElementById('myChart').getContext('2d');
+        const labels = Array.from({ length: 24 }, (_, i) => i);
+        const data = Object.values(this.filteredData);
+        const max = Math.max(...data);
+        if (max > this.maxObservedCount) {
+          this.maxObservedCount = max;
+        }
 
         if (this.chart) {
           this.chart.destroy();
@@ -63,10 +84,10 @@
         this.chart = new Chart(ctx, {
           type: 'bar',
           data: {
-            labels: hours,
+            labels: labels,
             datasets: [{
-              label: 'Count of Validacijas',
-              data: counts,
+              label: `Validations per Hour (${this.selectedRoute === 'all' ? 'All Routes' : this.selectedRoute})`,
+              data: data,
               backgroundColor: 'rgba(75, 192, 192, 0.2)',
               borderColor: 'rgba(75, 192, 192, 1)',
               borderWidth: 1
@@ -83,16 +104,12 @@
         });
       },
 
-      async fetchNewData() {
-        this.loading = true;
-        const params = new URLSearchParams({ param1: this.param1 });
-        const response = await fetch('{{ url_for('main.get_times') }}'.concat("?", params));
-        this.data = await response.json();
-        this.renderChart(this.data);
-        this.loading = false;
-      },
-
-    }));
-  });
+      onRouteChange(event) {
+        this.selectedRoute = event.target.value;
+        this.filteredData = this.filterDataByRoute(this.selectedRoute);
+        this.renderChart();
+      }
+    }))
+  })
 </script>
 {% endblock scripts %}
