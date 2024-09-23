@@ -51,6 +51,7 @@ def load_data(data_path: str, encoding: str):
     from datetime import datetime
     import glob
     from peewee import chunked, DoesNotExist
+    from tqdm import tqdm
     # pylint: enable=import-outside-toplevel
     sqlite_db.connect(reuse_if_open=True)
     col_names: list[str] = ['id', 'parks', 'transports', 'gar',
@@ -90,26 +91,27 @@ def load_data(data_path: str, encoding: str):
         for batch in chunked(df_talons_dict, 100):
             Talons.insert_many(batch).on_conflict_ignore().execute()
 
+    parks_cache = {p.parks: p.id for p in Parks.select()}
+    transports_cache = {t.transports: t.id for t in Transports.select()}
+    gar_nr_cache = {g.gar: g.id for g in GarNr.select()}
+    marsruts_cache = {(m.mars_nos, m.marsruts): m.id for m in Marsruts.select()}
+    talons_cache = {tal.talons: tal.id for tal in Talons.select()}
+
     validacijas: list[dict] = []
-    for row in df.itertuples():
+    for row in tqdm(df.itertuples(), total=len(df), desc='Processing rows'):
         def virziens(a, b):
             return a == b
-        parks_obj = Parks.select(Parks.id).where(
-            Parks.parks == row.parks).first()
-        transports_obj = Transports.select(Transports.id).where(
-            Transports.transports == row.transports).first()
-        gar_nr_obj = GarNr.select(GarNr.id).where(
-            GarNr.gar == row.gar).first()
-        marsruts_obj = Marsruts.select(Marsruts.id).where(
-            Marsruts.marsruts == row.marsruts).first()
-        talons_obj = Talons.select(Talons.id).where(
-            Talons.talons == row.talons).first()
+        parks_id = parks_cache.get(row.parks)
+        transports_id = transports_cache.get(row.transports)
+        gar_nr_id = gar_nr_cache.get(row.gar)
+        marsruts_id = marsruts_cache.get((row.mars_nos, row.marsruts))
+        talons_id = talons_cache.get(row.talons, 0)
         validacija = {
-            'parks_id': parks_obj.id,
-            'transp_id': transports_obj.id,
-            'gar_nr_id': gar_nr_obj.id,
-            'marsruts_id': marsruts_obj.id,
-            'talona_id': talons_obj.id if talons_obj else 0,
+            'parks_id': parks_id,
+            'transp_id': transports_id,
+            'gar_nr_id': gar_nr_id,
+            'marsruts_id': marsruts_id,
+            'talona_id': talons_id,
             'virziens': virziens(row.virziens, 'Forth'),
             'laiks': datetime.strptime(str(row.laiks), datetime_format)
         }

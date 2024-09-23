@@ -8,6 +8,7 @@ python-dotenv = "*"
 flask = "*"
 pandas = "*"
 peewee = "*"
+tqdm = "*"
 
 [dev-packages]
 
