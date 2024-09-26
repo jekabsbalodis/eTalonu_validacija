@@ -41,7 +41,7 @@ def routes():
     '''Render the page with statistics of most used routes'''
     query = (Validacijas.
              select(
-                 Marsruts.marsruts, fn.COUNT(Validacijas.id).alias('count')
+                 Marsruts.marsruts. alias('route'), fn.COUNT(Validacijas.id).alias('count')
              ).join(
                  Marsruts, JOIN.LEFT_OUTER
              ).group_by(
@@ -49,7 +49,7 @@ def routes():
              ).order_by(
                  fn.COUNT(Validacijas.id).desc()))
 
-    results = [(result.marsruts_id.marsruts, result.count) for result in query]
+    results = list(query.tuples().iterator())
 
     return render_template('routes.jinja', results=results)
 
@@ -64,35 +64,28 @@ def times():
 @main.get("/times_data")
 def times_data():
     '''Get data for times page'''
-    results = []
+    route = request.args.get('param1')
+    validations = [(hour, 0) for hour in range(24)]
 
     query = (Validacijas.
              select(
-                 Marsruts.marsruts.alias('route'),
-                 fn.COUNT(Validacijas.id).alias('count'),
-                 Validacijas.laiks.hour.alias('hour')).
+                 Validacijas.laiks.hour.alias('hour'),
+                 fn.COUNT(Validacijas.id).alias('count')).
              join(
                  Marsruts, JOIN.LEFT_OUTER).
              group_by(
-                 Validacijas.laiks.hour, Marsruts.marsruts))
+                 Validacijas.laiks.hour))
+    cursor = sqlite_db.execute(query)
 
-    for result in query:
-        route = result.marsruts_id.route
-        hour = result.hour
-        count = result.count
-        route_dict = {"route": route,
-                      "validations": {hour: count}}
+    for hour, count in cursor:
+        validations[hour] = count
+    print(validations)
 
-        existing_route = next(
-            (r for r in results if r["route"] == route), None)
-        if existing_route:
-            existing_route["validations"][hour] = count
-        else:
-            results.append(route_dict)
+    # results = []
+    # for route, validations in validations.items():
+    #     route_dict = {'route': route, 'validations': {}}
+    #     for hour in range(24):
+    #         route_dict['validations'][hour] = validations.get(hour, 0)
+    #     results.append(route_dict)
 
-    for route_dict in results:
-        for hour in range(24):
-            if hour not in route_dict["validations"]:
-                route_dict["validations"][hour] = 0
-
-    return jsonify(results)
+    return jsonify(validations)

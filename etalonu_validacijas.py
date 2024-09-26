@@ -130,3 +130,40 @@ def load_data(data_path: str, encoding: str):
             Validacijas.insert_many(batch).on_conflict_ignore().execute()
 
     sqlite_db.close()
+
+
+@app.cli.command('test-read')
+def test_read():
+    from peewee import fn, JOIN
+    sqlite_db.connect(reuse_if_open=True)
+    validations = [(hour, 0) for hour in range(24)]
+    print(validations)
+
+    query = (Validacijas.
+             select(
+                 Validacijas.laiks.hour.alias('hour'),
+                 fn.COUNT(Validacijas.id).alias('count')).
+             group_by(
+                 Validacijas.laiks.hour))
+
+    for hour, count in query.tuples().iterator():
+        validations[hour] = count
+        print(hour, ' -> ', count)
+    print(validations)
+
+
+@app.cli.command('execute-sql')
+def execute_sql():
+    sqlite_db.connect(reuse_if_open=True)
+
+    sqlite_db.execute_sql("PRAGMA synchronous = NORMAL;")
+    sqlite_db.execute_sql("PRAGMA journal_mode = WAL;")
+    sqlite_db.execute_sql("PRAGMA cache_size = -40000;")
+    sqlite_db.execute_sql("PRAGMA temp_store = MEMORY;")
+    sqlite_db.execute_sql("PRAGMA mmap_size = 268435456;")
+    sqlite_db.execute_sql("PRAGMA locking_mode = EXCLUSIVE;")
+    sqlite_db.execute_sql("PRAGMA auto_vacuum = NONE;")
+    sqlite_db.execute_sql("PRAGMA optimize;")
+    sqlite_db.execute_sql("VACUUM;")
+
+    sqlite_db.close()

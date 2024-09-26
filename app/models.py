@@ -54,3 +54,8 @@ class Validacijas(BaseModel):
     virziens = pw.BooleanField()
     talona_id = pw.ForeignKeyField(Talons)
     laiks = pw.DateTimeField()
+
+    class Meta:
+        indexes = (
+            (('laiks',), False)
+        )
