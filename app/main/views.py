@@ -6,7 +6,7 @@ from flask import jsonify, render_template, redirect, session, request, url_for
 from peewee import JOIN, fn
 from app.models import sqlite_db, Validacijas, Marsruts
 from . import main
-
+import duckdb
 
 @main.before_request
 def _db_connect():
@@ -64,28 +64,49 @@ def times():
 @main.get("/times_data")
 def times_data():
     '''Get data for times page'''
-    route = request.args.get('param1')
-    validations = [(hour, 0) for hour in range(24)]
+    results = []
 
-    query = (Validacijas.
-             select(
-                 Validacijas.laiks.hour.alias('hour'),
-                 fn.COUNT(Validacijas.id).alias('count')).
-             join(
-                 Marsruts, JOIN.LEFT_OUTER).
-             group_by(
-                 Validacijas.laiks.hour))
-    cursor = sqlite_db.execute(query)
+    # Connect to DuckDB database
+    con = duckdb.connect("file.db")
 
-    for hour, count in cursor:
-        validations[hour] = count
-    print(validations)
+    # SQL query to get the number of validations per hour per route
+    query = """
+    SELECT 
+        TMarsruts AS route, 
+        EXTRACT(hour FROM Laiks) AS hour, 
+        COUNT(*) AS count
+    FROM 
+        validacijas
+    GROUP BY 
+        route, hour
+    ORDER BY 
+        route, hour;
+    """
 
-    # results = []
-    # for route, validations in validations.items():
-    #     route_dict = {'route': route, 'validations': {}}
-    #     for hour in range(24):
-    #         route_dict['validations'][hour] = validations.get(hour, 0)
-    #     results.append(route_dict)
+    # Execute the query
+    query_results = con.execute(query).fetchall()
 
-    return jsonify(validations)
+    # Process the query results
+    for route, hour, count in query_results:
+        # Find existing route in results
+        existing_route = next((r for r in results if r["route"] == route), None)
+        
+        if existing_route:
+            # If route exists, update its validations for the specific hour
+            existing_route["validations"][int(hour)] = count
+        else:
+            # If route doesn't exist, create a new route entry with validations
+            route_dict = {
+                "route": route,
+                "validations": {int(hour): count}
+            }
+            results.append(route_dict)
+
+    # Ensure every route has validation counts for all 24 hours (default to 0)
+    for route_dict in results:
+        for hour in range(24):
+            if hour not in route_dict["validations"]:
+                route_dict["validations"][hour] = 0
+
+    # Return the results as JSON
+    return jsonify(results)

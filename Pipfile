@@ -9,6 +9,7 @@ flask = "*"
 pandas = "*"
 peewee = "*"
 tqdm = "*"
+duckdb = "*"
 
 [dev-packages]
 

@@ -154,16 +154,33 @@ def test_read():
 
 @app.cli.command('execute-sql')
 def execute_sql():
-    sqlite_db.connect(reuse_if_open=True)
+    # sqlite_db.connect(reuse_if_open=True)
 
-    sqlite_db.execute_sql("PRAGMA synchronous = NORMAL;")
-    sqlite_db.execute_sql("PRAGMA journal_mode = WAL;")
-    sqlite_db.execute_sql("PRAGMA cache_size = -40000;")
-    sqlite_db.execute_sql("PRAGMA temp_store = MEMORY;")
-    sqlite_db.execute_sql("PRAGMA mmap_size = 268435456;")
-    sqlite_db.execute_sql("PRAGMA locking_mode = EXCLUSIVE;")
-    sqlite_db.execute_sql("PRAGMA auto_vacuum = NONE;")
-    sqlite_db.execute_sql("PRAGMA optimize;")
-    sqlite_db.execute_sql("VACUUM;")
+    # sqlite_db.execute_sql("PRAGMA synchronous = NORMAL;")
+    # sqlite_db.execute_sql("PRAGMA journal_mode = WAL;")
+    # sqlite_db.execute_sql("PRAGMA cache_size = -40000;")
+    # sqlite_db.execute_sql("PRAGMA temp_store = MEMORY;")
+    # sqlite_db.execute_sql("PRAGMA mmap_size = 268435456;")
+    # sqlite_db.execute_sql("PRAGMA locking_mode = EXCLUSIVE;")
+    # sqlite_db.execute_sql("PRAGMA auto_vacuum = NONE;")
+    # sqlite_db.execute_sql("PRAGMA optimize;")
+    # sqlite_db.execute_sql("VACUUM;")
 
-    sqlite_db.close()
+    # sqlite_db.close()
+    import duckdb
+
+    with duckdb.connect("file.db") as con:
+        # con.execute("CREATE TABLE validacijas AS SELECT * FROM read_csv('validacijudati08_2024\\*.txt')")
+        results = con.execute("""
+        SELECT 
+            TMarsruts AS route, 
+            EXTRACT(hour FROM Laiks) AS hour_of_day, 
+            COUNT(*) AS validation_count
+        FROM 
+            validacijas
+        GROUP BY 
+            route, hour_of_day
+        ORDER BY 
+            route, hour_of_day
+    """).fetchall()
+        print(results)
