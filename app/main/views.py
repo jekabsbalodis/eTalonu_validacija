@@ -1,22 +1,10 @@
 '''
 Main routes and view functions for the Flask application.
-Includes database connection management and theme toggling
+Includes theme toggling
 '''
-from flask import jsonify, render_template, redirect, session, request, url_for
-from peewee import JOIN, fn
-from app.models import sqlite_db, Validacijas, Marsruts
-from . import main
 import duckdb
-
-@main.before_request
-def _db_connect():
-    sqlite_db.connect(reuse_if_open=True)
-
-
-@main.teardown_request
-def _db_close(exc):
-    if not sqlite_db.is_closed():
-        sqlite_db.close()
+from flask import jsonify, redirect, render_template, request, session, url_for, current_app
+from . import main
 
 
 @main.get("/toggle-theme")
@@ -39,21 +27,10 @@ def index():
 @main.route('/routes', methods=['GET'])
 def routes():
     '''Render the page with statistics of most used routes'''
-    query = (Validacijas.
-             select(
-                 Marsruts.marsruts. alias('route'), fn.COUNT(Validacijas.id).alias('count')
-             ).join(
-                 Marsruts, JOIN.LEFT_OUTER
-             ).group_by(
-                 Marsruts.marsruts
-             ).order_by(
-                 fn.COUNT(Validacijas.id).desc()))
-
-    results = list(query.tuples().iterator())
-
-    return render_template('routes.jinja', results=results)
+    return render_template('routes.jinja')
 
 
+@main.route('/routes_data')
 @main.route('/times', methods=['GET'])
 def times():
     '''Render the page with statistics of hours when public transportation is used the most'''
@@ -67,7 +44,7 @@ def times_data():
     results = []
 
     # Connect to DuckDB database
-    con = duckdb.connect("file.db")
+    con = duckdb.connect(current_app.config['DATABASE'])
 
     # SQL query to get the number of validations per hour per route
     query = """
@@ -89,8 +66,9 @@ def times_data():
     # Process the query results
     for route, hour, count in query_results:
         # Find existing route in results
-        existing_route = next((r for r in results if r["route"] == route), None)
-        
+        existing_route = next(
+            (r for r in results if r["route"] == route), None)
+
         if existing_route:
             # If route exists, update its validations for the specific hour
             existing_route["validations"][int(hour)] = count

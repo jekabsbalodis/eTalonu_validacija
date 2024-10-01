@@ -15,27 +15,18 @@ class Config:
 class DevelopmentConfig(Config):
     '''Development configuration'''
     DEBUG = True
-    DATABASE = {
-        'name': 'data-dev.sqlite',
-        'engine': 'peewee.SqliteDatabase',
-    }
+    DATABASE = 'data-dev.duckdb'
 
 
 class TestingConfig(Config):
     '''Testing configuration'''
     TESTING = True
-    DATABASE = {
-        'name': ':memory:',
-        'engine': 'peewee.SqliteDatabase',
-    }
+    DATABASE = ''
 
 
 class ProductionConfig(Config):
     '''Production configuration'''
-    DATABASE = {
-        'name': 'data.sqlite',
-        'engine': 'peewee.SqliteDatabase',
-    }
+    DATABASE = 'data.duckdb'
 
 
 config = {

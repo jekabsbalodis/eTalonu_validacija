@@ -6,9 +6,6 @@ name = "pypi"
 [packages]
 python-dotenv = "*"
 flask = "*"
-pandas = "*"
-peewee = "*"
-tqdm = "*"
 duckdb = "*"
 
 [dev-packages]
