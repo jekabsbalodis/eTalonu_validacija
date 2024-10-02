@@ -1,4 +1,4 @@
-{% extends "base.jinja" %}
+{% extends 'base.jinja' %}
 
 {% block title %}
 <title>eTalonu validācijas - Populārākie maršruti</title>
@@ -6,24 +6,24 @@
 
 {% block head %}
 {{ super() }}
-<script src="https://unpkg.com/chart.js@4.4.3/dist/chart.umd.js"
-    integrity="sha512-LUpacDQOhzI4MVomIbJOUbdKypLvklsznjLrjD9GwzynjSlF7qLy112SzTw+ZWJPxhBvNRLGGdW/7E1slOvsFA=="
-    crossorigin="anonymous" defer></script>
+<script src='https://unpkg.com/chart.js@4.4.3/dist/chart.umd.js'
+    integrity='sha512-LUpacDQOhzI4MVomIbJOUbdKypLvklsznjLrjD9GwzynjSlF7qLy112SzTw+ZWJPxhBvNRLGGdW/7E1slOvsFA=='
+    crossorigin='anonymous' defer></script>
 {% endblock head %}
 
 {% block page_content %}
-<div style="width: 75%; margin: auto;">
-    <canvas id="myChart"></canvas>
+<div style='width: 75%; margin: auto;'>
+    <canvas id='myChart'></canvas>
 </div>
 {% endblock page_content %}
 {% block scripts %}
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        console.log("DOM loaded");
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM loaded');
         const ctx = document.getElementById('myChart');
         if (!ctx) {
-            console.error("Canvas element not found");
+            console.error('Canvas element not found');
             return;
         }
 
@@ -31,8 +31,8 @@
     }};
     const data = {{ results| map(attribute = 1) | list | tojson }};
 
-    console.log("Labels:", labels);
-    console.log("Data:", data);
+    console.log('Labels:', labels);
+    console.log('Data:', data);
 
     try {
         new Chart(ctx, {
@@ -55,9 +55,9 @@
                 }
             }
         });
-        console.log("Chart created successfully");
+        console.log('Chart created successfully');
     } catch (error) {
-        console.error("Error creating chart:", error);
+        console.error('Error creating chart:', error);
     }
     });
 </script>

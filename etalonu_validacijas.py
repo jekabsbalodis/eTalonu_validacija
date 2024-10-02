@@ -25,7 +25,7 @@ db_file: str = app.config['DATABASE']
 def create_tables():
     '''Create duckdb database file and create table to store data into it.'''
     with duckdb.connect(db_file) as con:
-        con.sql("""
+        con.sql('''
                 CREATE TABLE IF NOT EXISTS validacijas(
                 Ier_ID UINTEGER,
                 Parks VARCHAR,
@@ -36,7 +36,7 @@ def create_tables():
                 Virziens VARCHAR,
                 ValidTalonaId UINTEGER,
                 Laiks TIMESTAMP);
-                """)
+                ''')
 
 
 @app.cli.command('load-data')
@@ -44,6 +44,6 @@ def create_tables():
 def load_data(data_folder: str):
     '''Load data from a CSV files into the database.'''
     with duckdb.connect(db_file) as con:
-        con.sql(f"""
-                COPY validacijas FROM '{data_folder}\\ValidDati*.txt';
-                """)
+        con.sql(f'''
+                COPY validacijas FROM "{data_folder}\\ValidDati*.txt";
+                ''')

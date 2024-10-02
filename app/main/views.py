@@ -7,15 +7,15 @@ from flask import jsonify, redirect, render_template, request, session, url_for,
 from . import main
 
 
-@main.get("/toggle-theme")
+@main.get('/toggle-theme')
 def toggle_theme():
     '''Toggle between light and dark themes'''
-    current_theme = session.get("theme")
-    if current_theme == "dark":
-        session["theme"] = "light"
+    current_theme = session.get('theme')
+    if current_theme == 'dark':
+        session['theme'] = 'light'
     else:
-        session["theme"] = "dark"
-    return redirect(request.args.get("current_page") or '/')
+        session['theme'] = 'dark'
+    return redirect(request.args.get('current_page') or '/')
 
 
 @main.route('/', methods=['GET'])
@@ -38,53 +38,47 @@ def times():
     return render_template('time.jinja', data_url=data_url)
 
 
-@main.get("/times_data")
+@main.get('/times_data')
 def times_data():
     '''Get data for times page'''
     results = []
 
-    # Connect to DuckDB database
-    con = duckdb.connect(current_app.config['DATABASE'])
+    with duckdb.connect(current_app.config['DATABASE']) as con:
+        query = '''
+            SELECT
+                TMarsruts AS route,
+                EXTRACT(hour FROM Laiks) AS hour,
+                COUNT(*) AS count
+            FROM
+                validacijas
+            GROUP BY
+                route, hour
+            ORDER BY
+                route, hour;
+            '''
+        query_results = con.sql(query).fetchall()
 
-    # SQL query to get the number of validations per hour per route
-    query = """
-    SELECT 
-        TMarsruts AS route, 
-        EXTRACT(hour FROM Laiks) AS hour, 
-        COUNT(*) AS count
-    FROM 
-        validacijas
-    GROUP BY 
-        route, hour
-    ORDER BY 
-        route, hour;
-    """
-
-    # Execute the query
-    query_results = con.execute(query).fetchall()
-
-    # Process the query results
     for route, hour, count in query_results:
         # Find existing route in results
         existing_route = next(
-            (r for r in results if r["route"] == route), None)
+            (r for r in results if r['route'] == route), None)
 
         if existing_route:
             # If route exists, update its validations for the specific hour
-            existing_route["validations"][int(hour)] = count
+            existing_route['validations'][int(hour)] = count
         else:
             # If route doesn't exist, create a new route entry with validations
             route_dict = {
-                "route": route,
-                "validations": {int(hour): count}
+                'route': route,
+                'validations': {int(hour): count}
             }
             results.append(route_dict)
 
     # Ensure every route has validation counts for all 24 hours (default to 0)
     for route_dict in results:
         for hour in range(24):
-            if hour not in route_dict["validations"]:
-                route_dict["validations"][hour] = 0
+            if hour not in route_dict['validations']:
+                route_dict['validations'][hour] = 0
 
     # Return the results as JSON
     return jsonify(results)
