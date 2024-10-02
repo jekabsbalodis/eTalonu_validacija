@@ -1,4 +1,4 @@
-{% extends "base.jinja" %}
+{% extends 'base.jinja' %}
 
 {% block title %}
 <title>eTalonu validācijas - Braucieni stundā</title>
@@ -6,23 +6,23 @@
 
 {% block head %}
 {{ super() }}
-<script src="https://unpkg.com/chart.js@4.4.3/dist/chart.umd.js"
-  integrity="sha512-LUpacDQOhzI4MVomIbJOUbdKypLvklsznjLrjD9GwzynjSlF7qLy112SzTw+ZWJPxhBvNRLGGdW/7E1slOvsFA=="
-  crossorigin="anonymous" defer></script>
+<script src='https://unpkg.com/chart.js@4.4.3/dist/chart.umd.js'
+  integrity='sha512-LUpacDQOhzI4MVomIbJOUbdKypLvklsznjLrjD9GwzynjSlF7qLy112SzTw+ZWJPxhBvNRLGGdW/7E1slOvsFA=='
+  crossorigin='anonymous' defer></script>
 {% endblock head %}
 
 {% block page_content %}
-<div x-data="chart_data">
-  <div style="width: 75%; margin: auto;">
-    <label for="routeSelect">Select Route: </label>
-    <select id="routeSelect" x-on:change="onRouteChange">
-      <option value="all">All Routes</option>
-      <template x-for="route in allData">
-        <option :value="route.route" x-text="route.route"></option>
+<div x-data='chart_data'>
+  <div style='width: 75%; margin: auto;'>
+    <label for='routeSelect'>Select Route: </label>
+    <select id='routeSelect' x-on:change='onRouteChange'>
+      <option value='all'>All Routes</option>
+      <template x-for='route in allData'>
+        <option :value='route.route' x-text='route.route'></option>
       </template>
     </select>
 
-    <canvas id="myChart"></canvas>
+    <canvas id='myChart'></canvas>
   </div>
 </div>
 {% endblock page_content %}
@@ -37,7 +37,7 @@
       maxObservedCount: 0,
 
       init() {
-        fetch("{{ data_url }}")
+        fetch('{{ data_url }}')
           .then(response => response.json())
           .then(data => {
             this.allData = data;
