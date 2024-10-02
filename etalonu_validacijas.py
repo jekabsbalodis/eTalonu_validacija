@@ -13,6 +13,7 @@ if os.path.exists(dotenv_path):
 
 # pylint: disable=wrong-import-position
 import duckdb
+import click
 from app import create_app
 # pylint: enable=wrong-import-position
 
@@ -39,9 +40,10 @@ def create_tables():
 
 
 @app.cli.command('load-data')
-def load_data():
+@click.argument('data_folder', type=click.Path(exists=True))
+def load_data(data_folder: str):
     '''Load data from a CSV files into the database.'''
     with duckdb.connect(db_file) as con:
-        con.sql("""
-                COPY validacijas FROM 'validacijudati08_2024\\ValidDati*.txt';
+        con.sql(f"""
+                COPY validacijas FROM '{data_folder}\\ValidDati*.txt';
                 """)
