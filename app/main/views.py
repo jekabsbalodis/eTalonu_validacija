@@ -1,6 +1,6 @@
 '''
 Main routes and view functions for the Flask application.
-Includes theme toggling
+Includes theme toggling.
 '''
 import duckdb
 from flask import jsonify, redirect, render_template, request, session, url_for, current_app
@@ -9,7 +9,7 @@ from . import main
 
 @main.get('/toggle-theme')
 def toggle_theme():
-    '''Toggle between light and dark themes'''
+    '''Toggle between light and dark themes.'''
     current_theme = session.get('theme')
     if current_theme == 'dark':
         session['theme'] = 'light'
@@ -18,29 +18,61 @@ def toggle_theme():
     return redirect(request.args.get('current_page') or '/')
 
 
-@main.route('/', methods=['GET'])
+@main.get('/')
 def index():
-    '''Render the start page of the app'''
+    '''Render the start page of the app.'''
     return render_template('index.jinja')
 
 
-@main.route('/routes', methods=['GET'])
+@main.get('/routes')
 def routes():
-    '''Render the page with statistics of most used routes'''
-    return render_template('routes.jinja')
+    '''Render the page with statistics of most used routes.'''
+    # data_url = url_for('main.routes_data')
+    with duckdb.connect(current_app.config['DATABASE']) as con:
+        query: str = '''
+            SELECT
+                TMarsruts AS route,
+                COUNT(*) AS count
+            FROM
+                validacijas
+            GROUP BY
+                TMarsruts
+            ORDER BY
+                count DESC
+            '''
+        query_results = con.sql(query).fetchall()
+    return render_template('routes.jinja', results=query_results)
 
 
-@main.route('/routes_data')
-@main.route('/times', methods=['GET'])
+@main.get('/routes_data')
+def routes_data():
+    '''Get data for routes page.'''
+    with duckdb.connect(current_app.config['DATABASE']) as con:
+        query: str = '''
+            SELECT
+                TMarsruts AS route,
+                COUNT(*) AS count
+            FROM
+                validacijas
+            GROUP BY
+                TMarsruts
+            ORDER BY
+                count DESC
+            '''
+        query_results = con.sql(query).fetchall()
+    return jsonify(query_results)
+
+
+@main.get('/times')
 def times():
-    '''Render the page with statistics of hours when public transportation is used the most'''
+    '''Render the page with statistics of hours when public transportation is used the most.'''
     data_url = url_for('main.times_data')
     return render_template('time.jinja', data_url=data_url)
 
 
 @main.get('/times_data')
 def times_data():
-    '''Get data for times page'''
+    '''Get data for times page.'''
     results = []
 
     with duckdb.connect(current_app.config['DATABASE']) as con:
