@@ -5,9 +5,8 @@ Includes theme toggling.
 from typing import TypedDict
 import duckdb
 from flask import jsonify, redirect, render_template, request, session, url_for, current_app
-
-from app.main.forms import MonthSelectForm
-from . import main
+from app.main.forms import TimeSelectForm
+from app.main import main
 
 
 @main.get('/toggle-theme')
@@ -66,46 +65,32 @@ def routes_data():
     return jsonify(query_results)
 
 
-@main.route('/times', methods=['GET', 'POST'])
+@main.get('/times')
 def times():
     '''Render the page with statistics of hours when public transportation is used the most.'''
-    form = MonthSelectForm()
+    form = TimeSelectForm()
     data_url = url_for('main.times_data')
-    if form.validate_on_submit():
-        start_date_tuple = (form.start_date.data.strftime(
-            '%m'), form.start_date.data.strftime('%Y'))
-        end_date_tuple = (form.end_date.data.strftime('%m'),
-                          form.end_date.data.strftime('%Y'))
-        data_url = url_for(
-            'main.times_data',
-            start_month=start_date_tuple[0],
-            start_year=start_date_tuple[1],
-            end_month=end_date_tuple[0],
-            end_year=end_date_tuple[1])
     return render_template('time.jinja', data_url=data_url, form=form)
 
 
-@main.get('/times_data')
+@main.route('/times_data', methods=['GET', 'POST'])
 def times_data():
     '''Get data for times page.'''
 
+    class DatasetDict(TypedDict):
+        '''Define model for the dataset dict.'''
+        label: str
+        data: list[int]
+
     class ResultsDict(TypedDict):
         '''Define model for the data to hold validations for each route and hour.'''
-        route: str
-        validations: dict[int, int]
+        labels: list[int]
+        datasets: list[DatasetDict]
 
-    requested_date = request.args
+    form = TimeSelectForm()
 
     with duckdb.connect(current_app.config['DATABASE']) as con:
-        max_month = con.sql('''
-                        SELECT
-                            month(max(Laiks)),
-                            year(max(Laiks))
-                        FROM
-                            validacijas;
-                        ''').fetchone()
-        print(max_month)
-        test = con.sql('''
+        last_month = con.sql('''
                     WITH LastMonth AS (
                         SELECT
                             EXTRACT(MONTH FROM MAX(Laiks)) AS max_m,
@@ -122,51 +107,58 @@ def times_data():
                         EXTRACT(MONTH FROM Laiks) = LastMonth.max_m AND
                         EXTRACT(YEAR FROM Laiks) = LastMonth.max_y;
                     ''').fetchone()
-        print(test[1])
         query = '''
             SELECT
-                TMarsruts AS route,
+                'all',
                 EXTRACT(hour FROM Laiks) AS hour,
                 COUNT(*) AS count
             FROM
                 validacijas
             WHERE
-                EXTRACT(month FROM Laiks)={} AND,
-                EXTRACT(year FROM Laiks)={}
+                Laiks BETWEEN '{} 00:00:00' AND '{} 23:59:59'
             GROUP BY
-                route, hour
+                 hour
             ORDER BY
-                route, hour;
+                hour;
             '''
-        if requested_date:
-            query_results = con.sql(query.format(
-                requested_date['start_month'], requested_date['start_year'])).fetchall()
+        if request.method == 'POST' and form.validate_on_submit():
+            start_date_tuple = (form.start_date.data.strftime(
+                '%m'), form.start_date.data.strftime('%Y'))
+            end_date_tuple = (form.end_date.data.strftime('%m'),
+                              form.end_date.data.strftime('%Y'))
+
+            query_results = con.sql(query.format()).fetchall()
         else:
             query_results = con.sql(query.format(
-                *max_month)).fetchall()  # type: ignore
+                *last_month)).fetchall()
 
-    results: list[ResultsDict] = []
+    results: ResultsDict = {'labels': [],
+                            'datasets': []}
+    print(query_results)
 
     for route, hour, count in query_results:
-        # Check if route dict already exists
-        existing_route = next(
-            (r for r in results if r['route'] == route), None)
+        # Add the route label to the datasets if it doesn't exist
+        if route not in [dataset["label"] for dataset in results["datasets"]]:
+            results["datasets"].append(
+                {"label": route, "data": [0] * 24})  # Initialize with 24 zeros
 
-        if existing_route:
-            # Update validations for the specific hour
-            existing_route['validations'][int(hour)] = int(count)
-        else:
-            # Create a new route dict with validations
-            route_dict: ResultsDict = {
-                'route': route,
-                'validations': {int(hour): int(count)}
-            }
-            results.append(route_dict)
+        # Find the dataset for the current route
+        dataset = [dataset for dataset in results["datasets"]
+                   if dataset["label"] == route][0]
 
-    # Ensure every route has validation counts for all 24 hours (default to 0)
-    for route_dict in results:
-        for hour in range(24):
-            if hour not in route_dict['validations']:
-                route_dict['validations'][hour] = 0
+        # Add the validation to the dataset's data list at the corresponding hour index
+        dataset["data"][hour] = count
+
+        # Add the hour to the labels list if it doesn't exist
+        if hour not in results["labels"]:
+            results["labels"].append(hour)
+
+    results["labels"].sort()
+
+    # # Ensure every route has validation counts for all 24 hours (default to 0)
+    # for route_dict in results:
+    #     for hour in range(24):
+    #         if hour not in route_dict['validations']:
+    #             route_dict['validations'][hour] = 0
 
     return jsonify(results)

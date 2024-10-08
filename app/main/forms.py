@@ -7,10 +7,12 @@ from wtforms import SubmitField, DateField, ValidationError
 from wtforms.validators import DataRequired
 
 
-class MonthSelectForm(FlaskForm):
+class TimeSelectForm(FlaskForm):
     '''Form to select the date and year for data display.'''
-    start_date = DateField('Sākuma datums', validators=[DataRequired()])
-    end_date = DateField('Beigu datums', validators=[DataRequired()])
+    start_date = DateField('Sākuma datums', validators=[
+                           DataRequired(message='Lūdzu norādi datumu.')])
+    end_date = DateField('Beigu datums', validators=[
+                         DataRequired(message='Lūdzu norādi datumu.')])
     submit = SubmitField('Atlasīt')
 
     def validate_end_date(self, field):

@@ -12,6 +12,20 @@
 {% endblock head %}
 
 {% block page_content %}
+<form class='needs-validation' action='/times_data' method='post'>
+  {{ form.hidden_tag() }}
+  <p>
+    {{ form.start_date.label }}
+    {{ form.start_date(class_='form-control is-invalid', oninvalid_='this.setCustomValidity("Ievadi datumu")') }}
+  </p>
+  <p>
+    {{ form.end_date.label }}
+    {{ form.end_date(class_='form-control is-valid') }}
+  </p>
+  <p>
+    {{ form.submit(class_='btn btn-primary') }}
+  </p>
+</form>
 <div x-data='chart_data'>
   <div style='width: 75%; margin: auto;'>
     <label for='routeSelect'>Select Route: </label>

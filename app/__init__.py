@@ -19,9 +19,7 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
-    # pylint: disable=import-outside-toplevel
-    from .main import main as main_blueprint
+    from .main import main as main_blueprint # pylint: disable=import-outside-toplevel
     app.register_blueprint(main_blueprint)
-    # pylint: enable=import-outside-toplevel
 
     return app

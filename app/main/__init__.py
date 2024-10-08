@@ -7,6 +7,4 @@ from flask import Blueprint
 
 main = Blueprint('main', __name__)
 
-# pylint: disable=wrong-import-position
-from . import views, errors
-# pylint: enable=wrong-import-position
+from . import views, errors  # pylint: disable=wrong-import-position

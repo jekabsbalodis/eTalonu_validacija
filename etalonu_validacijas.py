@@ -11,11 +11,9 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 
-# pylint: disable=wrong-import-position
-import duckdb
-import click
-from app import create_app
-# pylint: enable=wrong-import-position
+import duckdb  # pylint: disable=wrong-import-position
+import click  # pylint: disable=wrong-import-position
+from app import create_app  # pylint: disable=wrong-import-position
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 db_file: str = app.config['DATABASE']
