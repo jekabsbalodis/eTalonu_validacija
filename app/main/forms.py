@@ -3,7 +3,7 @@ Forms to select arguments to pass to view functions
 '''
 
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, DateField, ValidationError
+from wtforms import DateField, SubmitField, ValidationError
 from wtforms.validators import DataRequired
 
 

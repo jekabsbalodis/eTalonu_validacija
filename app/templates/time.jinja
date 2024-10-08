@@ -9,121 +9,26 @@
 <script src='https://unpkg.com/chart.js@4.4.3/dist/chart.umd.js'
   integrity='sha512-LUpacDQOhzI4MVomIbJOUbdKypLvklsznjLrjD9GwzynjSlF7qLy112SzTw+ZWJPxhBvNRLGGdW/7E1slOvsFA=='
   crossorigin='anonymous' defer></script>
+<script src="https://unpkg.com/htmx.org@2.0.3"
+  integrity="sha512-dQu3OKLMpRu85mW24LA1CUZG67BgLPR8Px3mcxmpdyijgl1UpCM1RtJoQP6h8UkufSnaHVRTUx98EQT9fcKohw=="
+  crossorigin="anonymous" defer></script>
 {% endblock head %}
 
 {% block page_content %}
-<form class='needs-validation' action='/times_data' method='post'>
-  {{ form.hidden_tag() }}
-  <p>
-    {{ form.start_date.label }}
-    {{ form.start_date(class_='form-control is-invalid', oninvalid_='this.setCustomValidity("Ievadi datumu")') }}
-  </p>
-  <p>
-    {{ form.end_date.label }}
-    {{ form.end_date(class_='form-control is-valid') }}
-  </p>
-  <p>
-    {{ form.submit(class_='btn btn-primary') }}
-  </p>
-</form>
-<div x-data='chart_data'>
-  <div style='width: 75%; margin: auto;'>
-    <label for='routeSelect'>Select Route: </label>
-    <select id='routeSelect' x-on:change='onRouteChange'>
-      <option value='all'>All Routes</option>
-      <template x-for='route in allData'>
-        <option :value='route.route' x-text='route.route'></option>
-      </template>
-    </select>
-
-    <canvas id='myChart'></canvas>
-  </div>
+<div style='width: 75%; margin: auto;'>
+  <canvas id='myChart' hx-get='{{ data_url }}' hx-trigger='load'></canvas>
 </div>
 {% endblock page_content %}
 {% block scripts %}
 <script>
-  document.addEventListener('alpine:init', () => {
-    Alpine.data('chart_data', () => ({
-      chart: null,
-      allData: [],
-      filteredData: [],
-      selectedRoute: 'all',
-      maxObservedCount: 0,
-
-      init() {
-        fetch('{{ data_url }}')
-          .then(response => response.json())
-          .then(data => {
-            this.allData = data;
-            this.filteredData = this.aggregateData(data);
-            this.renderChart();
-          })
-          .catch(error => console.error('Error fetching the data:', error));
-      },
-
-      aggregateData(data) {
-        const aggregated = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 21: 0, 22: 0, 23: 0 };
-
-        data.forEach(routeData => {
-          Object.entries(routeData.validations).forEach(([hour, count]) => {
-            aggregated[hour] += count;
-          });
-        });
-
-        return aggregated;
-      },
-
-      filterDataByRoute(route) {
-        if (route === 'all') {
-          return this.aggregateData(this.allData);
-        }
-
-        const routeData = this.allData.find(r => r.route === route);
-        return routeData ? routeData.validations : {};
-      },
-
-      renderChart() {
-        const ctx = document.getElementById('myChart').getContext('2d');
-        const labels = Array.from({ length: 24 }, (_, i) => i);
-        const data = Object.values(this.filteredData);
-        const max = Math.max(...data);
-        if (max > this.maxObservedCount) {
-          this.maxObservedCount = max;
-        }
-
-        if (this.chart) {
-          this.chart.destroy();
-        }
-
-        this.chart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: `Validations per Hour (${this.selectedRoute === 'all' ? 'All Routes' : this.selectedRoute})`,
-              data: data,
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              borderColor: 'rgba(75, 192, 192, 1)',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            scales: {
-              y: {
-                beginAtZero: true,
-                max: this.maxObservedCount + 10
-              }
-            }
-          }
-        });
-      },
-
-      onRouteChange(event) {
-        this.selectedRoute = event.target.value;
-        this.filteredData = this.filterDataByRoute(this.selectedRoute);
-        this.renderChart();
+  document.body.addEventListener('htmx:afterOnLoad', function (evt) {
+    new Chart(
+      document.getElementById('myChart'),
+      {
+        type: 'bar',
+        data: JSON.parse(evt.detail.xhr.responseText)
       }
-    }))
-  })
+    );
+  });
 </script>
 {% endblock scripts %}
