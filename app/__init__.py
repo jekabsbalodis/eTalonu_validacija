@@ -20,11 +20,11 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
-    from .main import \
-        main as main_blueprint  # pylint: disable=import-outside-toplevel
+    from .main import main as main_blueprint  # pylint: disable=import-outside-toplevel
     app.register_blueprint(main_blueprint)
-    from .data import \
-        data as data_blueprint  # pylint: disable=import-outside-toplevel
+    from .data import data as data_blueprint  # pylint: disable=import-outside-toplevel
     app.register_blueprint(data_blueprint)
+    from .validation import validation as validation_blueprint  # pylint: disable=import-outside-toplevel
+    app.register_blueprint(validation_blueprint)
 
     return app

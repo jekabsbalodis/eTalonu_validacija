@@ -22,10 +22,10 @@ class ResultsDict(TypedDict):
     datasets: list[RouteDataDict]
 
 
-@data.get('/routes_data')
+@data.get('/data/routes')
 def routes_data():
     '''Get data for routes page.'''
-    with duckdb.connect(current_app.config['DATABASE']) as con:
+    with duckdb.connect(current_app.config['DATABASE'], read_only=True) as con:
         query: str = '''
             SELECT
                 TMarsruts AS route,
@@ -50,10 +50,10 @@ def routes_data():
     return jsonify(results)
 
 
-@data.route('/times_data', methods=['GET', 'POST'])
+@data.route('/data/times', methods=['GET', 'POST'])
 def times_data():
     '''Get data for times page.'''
-    with duckdb.connect(current_app.config['DATABASE']) as con:
+    with duckdb.connect(current_app.config['DATABASE'], read_only=True) as con:
         last_month = con.sql('''
                     WITH LastMonth AS (
                         SELECT

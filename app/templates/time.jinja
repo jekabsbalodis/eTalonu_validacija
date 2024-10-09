@@ -15,6 +15,18 @@
 {% endblock head %}
 
 {% block page_content %}
+<form>
+  <div class='required'>
+    {{ form.start_date.label(class_='form-label') }}
+    {{ form.start_date(class_='form-control') }}
+  </div>
+  <div class='required' hx-target='this' hx-swap='innerHTML'>
+    {{ form.end_date.label(class_='form-label') }}
+    {{ form.end_date(class_='form-control', **{'hx-post': url_for("validation.validate_date")}) }}
+  </div>
+  </div>
+  {{ form.submit(class_='btn btn-primary') }}
+</form>
 <div style='width: 75%; margin: auto;'>
   <canvas id='myChart' hx-get='{{ data_url }}' hx-trigger='load'></canvas>
 </div>
