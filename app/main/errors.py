@@ -2,6 +2,7 @@
 Error handlers for the main blueprint
 '''
 from flask import render_template
+
 from . import main
 
 

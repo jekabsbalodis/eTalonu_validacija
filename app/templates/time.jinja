@@ -7,40 +7,31 @@
 {% block head %}
 {{ super() }}
 <script src='https://unpkg.com/chart.js@4.4.3/dist/chart.umd.js'
-  integrity='sha512-LUpacDQOhzI4MVomIbJOUbdKypLvklsznjLrjD9GwzynjSlF7qLy112SzTw+ZWJPxhBvNRLGGdW/7E1slOvsFA=='
-  crossorigin='anonymous' defer></script>
-<script src="https://unpkg.com/htmx.org@2.0.3"
-  integrity="sha512-dQu3OKLMpRu85mW24LA1CUZG67BgLPR8Px3mcxmpdyijgl1UpCM1RtJoQP6h8UkufSnaHVRTUx98EQT9fcKohw=="
-  crossorigin="anonymous" defer></script>
+    integrity='sha512-LUpacDQOhzI4MVomIbJOUbdKypLvklsznjLrjD9GwzynjSlF7qLy112SzTw+ZWJPxhBvNRLGGdW/7E1slOvsFA=='
+    crossorigin='anonymous' defer></script>
 {% endblock head %}
 
 {% block page_content %}
 <form>
-  <div class='required'>
     {{ form.start_date.label(class_='form-label') }}
     {{ form.start_date(class_='form-control') }}
-  </div>
-  <div class='required' hx-target='this' hx-swap='innerHTML'>
     {{ form.end_date.label(class_='form-label') }}
-    {{ form.end_date(class_='form-control', **{'hx-post': url_for("validation.validate_date")}) }}
-  </div>
-  </div>
-  {{ form.submit(class_='btn btn-primary') }}
+    {{ form.end_date(class_='form-control') }}
+    {{ form.submit(class_='btn btn-primary') }}
 </form>
-<div style='width: 75%; margin: auto;'>
-  <canvas id='myChart' hx-get='{{ data_url }}' hx-trigger='load'></canvas>
-</div>
+
+<canvas id='validationsByHourChart' x-init='$nextTick(() => {newChart()})'></canvas>
 {% endblock page_content %}
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/newChart.js') }}" defer></script>
 <script>
-  document.body.addEventListener('htmx:afterOnLoad', function (evt) {
-    new Chart(
-      document.getElementById('myChart'),
-      {
-        type: 'bar',
-        data: JSON.parse(evt.detail.xhr.responseText)
-      }
-    );
-  });
+    async function newChart() {
+        const response = await fetch('{{ data_url }}');
+        const validations = await response.json();
+        const labels = validations.labels;
+        const datasets = validations.datasets;
+        const visiMarsrtutiDataset = [datasets.find(dataset => dataset.label === 'Visi maršruti')];
+        createChart('validationsByHourChart', labels, visiMarsrtutiDataset);
+    }
 </script>
 {% endblock scripts %}

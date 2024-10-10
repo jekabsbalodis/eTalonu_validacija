@@ -24,7 +24,5 @@ def create_app(config_name):
     app.register_blueprint(main_blueprint)
     from .data import data as data_blueprint  # pylint: disable=import-outside-toplevel
     app.register_blueprint(data_blueprint)
-    from .validation import validation as validation_blueprint  # pylint: disable=import-outside-toplevel
-    app.register_blueprint(validation_blueprint)
 
     return app

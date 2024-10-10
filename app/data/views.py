@@ -73,7 +73,7 @@ def times_data():
                     ''').fetchone()
         query = '''
             SELECT
-                'Visi maršruti' AS route,
+                TMarsruts AS route,
                 EXTRACT(hour FROM Laiks) AS hour,
                 COUNT(*) AS count
             FROM
@@ -102,6 +102,15 @@ def times_data():
 
         # Add the validation to the dataset's data list at the corresponding hour index
         dataset["data"][hour] = count
+
+    results['datasets'] = sorted(
+        results['datasets'], key=lambda dataset: dataset['label'])
+
+    aggregated_data: RouteDataDict = {
+        'label': 'Visi maršruti', 'data': [0] * 24}
+    for route, hour, count in query_results:
+        aggregated_data['data'][hour] += count
+    results['datasets'].append(aggregated_data)
 
     results["labels"].sort()
 
