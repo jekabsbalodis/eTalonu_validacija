@@ -1,3 +1,5 @@
+{% from 'macros/render_form.jinja' import render_field, render_button %}
+
 {% extends 'base.jinja' %}
 
 {% block title %}
@@ -12,6 +14,15 @@
 {% endblock head %}
 
 {% block page_content %}
+<form class='form' method='post' action=''>
+    {{ form.hidden_tag() }}
+    {{ render_field(form.start_date) }}
+    <div class='mb-3'>
+        {{ render_field(form.end_date) }}
+    </div>
+    {{ render_button(form.submit) }}
+</form>
+
 <canvas id='mostUsedRoutesChart' x-init='$nextTick(() => {newChart()})'></canvas>
 {% endblock page_content %}
 {% block scripts %}

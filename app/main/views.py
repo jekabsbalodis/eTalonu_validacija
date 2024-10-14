@@ -5,7 +5,18 @@ Includes theme toggling.
 from flask import redirect, render_template, request, session, url_for
 
 from app.main import main
-from app.main.forms import TimeSelectForm
+from app.main.forms import DateSelectForm
+
+
+def get_selected_date(data_route: str):
+    '''Function to extract start_date and end_date from DateSelectForm used in various places'''
+    form = DateSelectForm()
+    if form.validate_on_submit():
+        data_url = url_for(
+            data_route, start_date=form.start_date.data, end_date=form.end_date.data)
+    else:
+        data_url = url_for(data_route)
+    return form, data_url
 
 
 @main.get('/toggle-theme')
@@ -25,16 +36,15 @@ def index():
     return render_template('index.jinja')
 
 
-@main.get('/routes')
+@main.route('/routes', methods=['GET', 'POST'])
 def routes():
     '''Render the page with statistics of most used routes.'''
-    data_url = url_for('data.routes_data')
-    return render_template('routes.jinja', data_url=data_url)
+    form, data_url = get_selected_date('data.routes_data')
+    return render_template('routes.jinja', data_url=data_url, form=form)
 
 
-@main.get('/times')
+@main.route('/times', methods=['GET', 'POST'])
 def times():
     '''Render the page with statistics of hours when public transportation is used the most.'''
-    form = TimeSelectForm()
-    data_url = url_for('data.times_data')
+    form, data_url = get_selected_date('data.times_data')
     return render_template('time.jinja', data_url=data_url, form=form)

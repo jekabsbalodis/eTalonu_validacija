@@ -1,3 +1,5 @@
+{% from 'macros/render_form.jinja' import render_field, render_button %}
+
 {% extends 'base.jinja' %}
 
 {% block title %}
@@ -12,12 +14,13 @@
 {% endblock head %}
 
 {% block page_content %}
-<form>
-    {{ form.start_date.label(class_='form-label') }}
-    {{ form.start_date(class_='form-control') }}
-    {{ form.end_date.label(class_='form-label') }}
-    {{ form.end_date(class_='form-control') }}
-    {{ form.submit(class_='btn btn-primary') }}
+<form class='form' method='post' action=''>
+    {{ form.hidden_tag() }}
+    {{ render_field(form.start_date) }}
+    <div class='mb-3'>
+        {{ render_field(form.end_date) }}
+    </div>
+    {{ render_button(form.submit) }}
 </form>
 
 <canvas id='validationsByHourChart' x-init='$nextTick(() => {newChart()})'></canvas>
