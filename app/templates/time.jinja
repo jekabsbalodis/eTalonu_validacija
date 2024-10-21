@@ -31,10 +31,7 @@
     async function newChart() {
         const response = await fetch('{{ data_url }}');
         const validations = await response.json();
-        const labels = validations.labels;
-        const datasets = validations.datasets;
-        const visiMarsrtutiDataset = [datasets.find(dataset => dataset.label === 'Visi maršruti')];
-        createChart('validationsByHourChart', labels, visiMarsrtutiDataset);
+        createChart('validationsByHourChart', validations);
     }
 </script>
 {% endblock scripts %}

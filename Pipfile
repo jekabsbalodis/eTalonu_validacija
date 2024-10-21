@@ -8,6 +8,7 @@ python-dotenv = "*"
 flask = "*"
 duckdb = "*"
 flask-wtf = "*"
+pandas = "*"
 
 [dev-packages]
 pylint = "*"

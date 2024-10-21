@@ -1,12 +1,9 @@
-function createChart(chartId, labels, datasets) {
+function createChart(chartId, validations) {
     new Chart(
         document.getElementById(chartId),
         {
             type: 'bar',
-            data: {
-                labels: labels,
-                datasets: datasets
-            }
+            data: validations
         }
     );
 }

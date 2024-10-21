@@ -2,6 +2,7 @@
 Data routes and view functions for the Flask app.
 Includes routes that provide data for the corresponding main functions.
 '''
+from datetime import date
 from typing import TypedDict
 
 import duckdb
@@ -71,34 +72,33 @@ VALIDATIONS_BY_HOUR_QUERY: str = '''
         '''
 
 
-def get_query_results(query: str):
+def get_query_results(query: str, start_date: date | None = None, end_date: date | None = None):
     '''Function to get database records'''
     with duckdb.connect(current_app.config['DATABASE'], read_only=True) as con:
-        last_month = con.sql(LAST_MONTH_QUERY).fetchone()
+        last_month: tuple[date] = con.sql(
+            LAST_MONTH_QUERY).fetchone()  # type: ignore
 
-        if request.args:
-            start_date = request.args.get('start_date')
-            end_date = request.args.get('end_date')
-            query_results = con.sql(query.format(
-                start_date, end_date)).fetchall()
+        if start_date is not None and end_date is not None:
+            query_results = con.sql(query.format(start_date, end_date)).df()
         else:
-            query_results = con.sql(query.format(*last_month)).fetchall()
-
+            query_results = con.sql(query.format(*last_month)).df()
     return query_results
 
 
 @data.get('/data/routes')
 def routes_data():
     '''Get data for routes page.'''
-    query_results = get_query_results(POPULAR_ROUTES_QUERY)
+    if request.args.get('start_date') and request.args.get('end_date'):
+        query_results = get_query_results(
+            POPULAR_ROUTES_QUERY)  # TODO: implement args
+    else:
+        query_results = get_query_results(POPULAR_ROUTES_QUERY)
 
     results: ResultsDict = {'labels': [], 'datasets': []}
 
-    for route, count in query_results:
-        results['labels'].append(route)
-
-    results['datasets'] = [{'label': 'Validāciju skaits', 'data': [
-        count for route, count in query_results]}]
+    results['labels'] = query_results['route'].to_list()
+    results['datasets'] = [
+        {'label': 'Validāciju skaits', 'data': query_results['count'].to_list()}]
 
     return jsonify(results)
 
@@ -106,32 +106,36 @@ def routes_data():
 @data.get('/data/times')
 def times_data():
     '''Get data for times page.'''
-    query_results = get_query_results(VALIDATIONS_BY_HOUR_QUERY)
+    if request.args.get('start_date') and request.args.get('end_date'):
+        query_results = get_query_results(
+            VALIDATIONS_BY_HOUR_QUERY)  # TODO: implement args
+    else:
+        query_results = get_query_results(VALIDATIONS_BY_HOUR_QUERY)
+    if request.args.get('route'):
+        query_results = query_results.groupby(
+            'hour')['count'].sum().reset_index()
+        query_results['route'] = 'Visi maršruti'  # TODO: implement args
+    else:
+        query_results = query_results.groupby(
+            'hour')['count'].sum().reset_index()
+        query_results['route'] = 'Visi maršruti'
 
     results: ResultsDict = {'labels': [], 'datasets': []}
-    results["labels"] = list(range(24))
 
-    for route, hour, count in query_results:
-        if route not in [dataset["label"] for dataset in results["datasets"]]:
-            results["datasets"].append(
-                {"label": route, "data": [0] * 24})  # Initialize with 24 zeros
+    results['labels'] = list(range(24))
 
-        dataset = [dataset for dataset in results["datasets"]
-                   if dataset["label"] == route][0]
+    groups = query_results.groupby('route')
+    routes = query_results['route'].unique().tolist()
+    for route in sorted(routes):
+        results['datasets'].append({'label': route, 'data': []})
 
-        dataset["data"][hour] = count
-
-    results['datasets'] = sorted(
-        results['datasets'], key=lambda dataset: dataset['label'])
-
-    aggregated_data: RouteDataDict = {
-        'label': 'Visi maršruti', 'data': [0] * 24}
-
-    for route, hour, count in query_results:
-        aggregated_data['data'][hour] += count
-
-    results['datasets'].append(aggregated_data)
-
-    results["labels"].sort()
+    for dataset in results['datasets']:
+        route_data = groups.get_group(dataset['label'])[['hour', 'count']]
+        for hour in range(24):
+            if hour in route_data['hour'].values:
+                dataset['data'].append(
+                    int(route_data.loc[route_data['hour'] == hour, 'count'].iloc[0]))
+            else:
+                dataset['data'].append(0)
 
     return jsonify(results)
