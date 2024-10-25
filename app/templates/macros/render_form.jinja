@@ -1,7 +1,9 @@
-{% macro render_field(field) %}
+{% macro render_date_field(field, min_date, max_date) %}
 
 {{ field.label(class_='form-label') }}
-{{ field(class_='form-control' + (' is-invalid' if field.errors else '')) }}
+{{ field(class_='form-control' + (' is-invalid' if field.errors else ''), **{'min': min_date, 'max': max_date,
+'x-model': field.id, 'x-ref': field.id, 'x-on:input': 'validateDates()'})
+}}
 
 {% for error in field.errors %}
 <span class='invalid-feedback d-block'>{{ error }}</span>

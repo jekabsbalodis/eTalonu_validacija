@@ -24,5 +24,7 @@ def create_app(config_name):
     app.register_blueprint(main_blueprint)
     from .data import data as data_blueprint  # pylint: disable=import-outside-toplevel
     app.register_blueprint(data_blueprint)
+    from .ajax import ajax as ajax_blueprint  # pylint: disable=import-outside-toplevel
+    app.register_blueprint(ajax_blueprint)
 
     return app

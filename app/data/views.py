@@ -2,7 +2,7 @@
 Data routes and view functions for the Flask app.
 Includes routes that provide data for the corresponding main functions.
 '''
-from datetime import date
+from datetime import date, datetime
 from typing import TypedDict
 
 import duckdb
@@ -73,7 +73,7 @@ VALIDATIONS_BY_HOUR_QUERY: str = '''
 
 
 def get_query_results(query: str, start_date: date | None = None, end_date: date | None = None):
-    '''Function to get database records'''
+    '''Function to get database records.'''
     with duckdb.connect(current_app.config['DATABASE'], read_only=True) as con:
         last_month: tuple[date] = con.sql(
             LAST_MONTH_QUERY).fetchone()  # type: ignore
@@ -85,14 +85,29 @@ def get_query_results(query: str, start_date: date | None = None, end_date: date
     return query_results
 
 
+def get_dates() -> tuple[date | None, date | None]:  # date range to be precise
+    '''Function to get user defined start and end date.'''
+
+    start_str = request.args.get('start_date')
+    end_str = request.args.get('end_date')
+    start_date, end_date = None, None
+
+    if start_str and end_str:
+        try:
+            start_date = datetime.strptime(start_str, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_str, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+
+    return start_date, end_date
+
+
 @data.get('/data/routes')
 def routes_data():
     '''Get data for routes page.'''
-    if request.args.get('start_date') and request.args.get('end_date'):
-        query_results = get_query_results(
-            POPULAR_ROUTES_QUERY)  # TODO: implement args
-    else:
-        query_results = get_query_results(POPULAR_ROUTES_QUERY)
+    start_date, end_date = get_dates()
+    query_results = get_query_results(
+        POPULAR_ROUTES_QUERY, start_date, end_date)
 
     results: ResultsDict = {'labels': [], 'datasets': []}
 
@@ -106,19 +121,13 @@ def routes_data():
 @data.get('/data/times')
 def times_data():
     '''Get data for times page.'''
-    if request.args.get('start_date') and request.args.get('end_date'):
-        query_results = get_query_results(
-            VALIDATIONS_BY_HOUR_QUERY)  # TODO: implement args
-    else:
-        query_results = get_query_results(VALIDATIONS_BY_HOUR_QUERY)
-    if request.args.get('route'):
-        query_results = query_results.groupby(
-            'hour')['count'].sum().reset_index()
-        query_results['route'] = 'Visi maršruti'  # TODO: implement args
-    else:
-        query_results = query_results.groupby(
-            'hour')['count'].sum().reset_index()
-        query_results['route'] = 'Visi maršruti'
+    start_date, end_date = get_dates()
+    query_results = get_query_results(
+        VALIDATIONS_BY_HOUR_QUERY, start_date, end_date)
+
+    query_results = query_results.groupby(
+        'hour')['count'].sum().reset_index()
+    query_results['route'] = 'Visi maršruti'
 
     results: ResultsDict = {'labels': [], 'datasets': []}
 

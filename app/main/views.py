@@ -2,21 +2,29 @@
 Main routes and view functions for the Flask application.
 Includes theme toggling.
 '''
-from flask import redirect, render_template, request, session, url_for
+from datetime import date
+import duckdb
+from flask import current_app, redirect, render_template, request, session, url_for
 
 from app.main import main
 from app.main.forms import DateSelectForm
 
 
-def get_selected_date(data_route: str):
-    '''Function to extract start_date and end_date from DateSelectForm used in various places'''
-    form = DateSelectForm()
-    if form.validate_on_submit():
-        data_url = url_for(
-            data_route, start_date=form.start_date.data, end_date=form.end_date.data)
-    else:
-        data_url = url_for(data_route)
-    return form, data_url
+TIME_RANGE_QUERY = '''
+        SELECT
+            date_trunc('day', MIN(Laiks)) AS min_time,
+            date_trunc('day', MAX(Laiks)) AS max_time
+        FROM
+            validacijas;
+        '''
+
+
+def get_time_range() -> tuple[date]:
+    '''Get time range for the currently available data'''
+    with duckdb.connect(current_app.config['DATABASE'], read_only=True) as con:
+        time_range: tuple[date] = con.sql(
+            TIME_RANGE_QUERY).fetchone()  # type: ignore
+    return time_range
 
 
 @main.get('/toggle-theme')
@@ -36,15 +44,19 @@ def index():
     return render_template('index.jinja')
 
 
-@main.route('/routes', methods=['GET', 'POST'])
+@main.get('/routes')
 def routes():
     '''Render the page with statistics of most used routes.'''
-    form, data_url = get_selected_date('data.routes_data')
-    return render_template('routes.jinja', data_url=data_url, form=form)
+    time_range = get_time_range()
+    form = DateSelectForm()
+    urls = (url_for('data.routes_data'), url_for('ajax.routes_ajax'))
+    return render_template('routes.jinja', urls=urls, form=form, time_range=time_range)
 
 
-@main.route('/times', methods=['GET', 'POST'])
+@main.get('/times')
 def times():
     '''Render the page with statistics of hours when public transportation is used the most.'''
-    form, data_url = get_selected_date('data.times_data')
-    return render_template('time.jinja', data_url=data_url, form=form)
+    time_range = get_time_range()
+    form = DateSelectForm()
+    urls = (url_for('data.times_data'), url_for('ajax.times_ajax'))
+    return render_template('time.jinja', urls=urls, form=form, time_range=time_range)

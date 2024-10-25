@@ -1,4 +1,4 @@
-{% from 'macros/render_form.jinja' import render_field, render_button %}
+{% from 'macros/render_script.jinja' import render_chart_script %}
 
 {% extends 'base.jinja' %}
 
@@ -6,32 +6,13 @@
 <title>eTalonu validācijas - Braucieni stundā</title>
 {% endblock title %}
 
-{% block head %}
-{{ super() }}
-<script src='https://unpkg.com/chart.js@4.4.3/dist/chart.umd.js'
-    integrity='sha512-LUpacDQOhzI4MVomIbJOUbdKypLvklsznjLrjD9GwzynjSlF7qLy112SzTw+ZWJPxhBvNRLGGdW/7E1slOvsFA=='
-    crossorigin='anonymous' defer></script>
-{% endblock head %}
-
 {% block page_content %}
-<form class='form' method='post' action=''>
-    {{ form.hidden_tag() }}
-    {{ render_field(form.start_date) }}
-    <div class='mb-3'>
-        {{ render_field(form.end_date) }}
-    </div>
-    {{ render_button(form.submit) }}
-</form>
 
-<canvas id='validationsByHourChart' x-init='$nextTick(() => {newChart()})'></canvas>
+{% include 'partials/date_select_form.jinja' %}
+<canvas id='validationsByHourChart'></canvas>
+
 {% endblock page_content %}
+
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/newChart.js') }}" defer></script>
-<script>
-    async function newChart() {
-        const response = await fetch('{{ data_url }}');
-        const validations = await response.json();
-        createChart('validationsByHourChart', validations);
-    }
-</script>
+{{ render_chart_script('validationsByHourChart', time_range[0], time_range[1]) }}
 {% endblock scripts %}

@@ -8,38 +8,50 @@
 
 <head>
   {% block head %}
+
   <meta charset='utf-8' />
   <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no' />
 
   <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}' type='image/x-icon' />
   <link rel='icon' href='{{ url_for("static", filename="favicon.ico") }}' type='image/x-icon' />
 
-  <link rel='stylesheet' href='https://unpkg.com/bootstrap@5.3.3/dist/css/bootstrap.min.css'
-    integrity='sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg=='
-    crossorigin='anonymous'>
-  <script src='https://unpkg.com/bootstrap@5.3.3/dist/js/bootstrap.min.js'
-    integrity='sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ=='
-    crossorigin='anonymous' defer></script>
-  <script src='https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js'
-    integrity='sha512-ytM6hP1K9BkRTjUQZpxZKFjJ2TvE4QXaK7phVymsm7NimaI5H09TWWW6f2JMbonLp4ftYU6xfwQGoe3C8jta9A=='
-    crossorigin='anonymous' defer></script>
   <style>
     [x-cloak] {
       display: none !important;
     }
   </style>
+
+  <link rel='stylesheet' href='https://unpkg.com/bootstrap@5.3.3/dist/css/bootstrap.min.css'
+    integrity='sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg=='
+    crossorigin='anonymous'>
+
+  <script src='https://unpkg.com/bootstrap@5.3.3/dist/js/bootstrap.min.js'
+    integrity='sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ=='
+    crossorigin='anonymous' defer></script>
+  <script src='https://unpkg.com/@alpinejs/persist@3.14.3/dist/cdn.min.js'
+    integrity='sha512-U5l9Ij+7jr0Nj2rqJmjGbh8x99su5qs88Hwqd47SMyWc7UEMPwJfhjrQWU6m6cv9HWSmIlQM1MZ4kEHPpG3/+Q=='
+    crossorigin='anonymous' defer></script>
+  <script src='https://unpkg.com/@imacrayon/alpine-ajax@0.9.1/dist/cdn.min.js'
+    integrity='sha512-3mq7MUjXt7nKHlXbU3aVwO+qu/JrejKJ84lmVXOSrW3RmKcUwkZZw3SPaHTSDNqHfABnYYOzCIrjcKB5Sd1YVQ=='
+    crossorigin='anonymous' defer></script>
+  <script src='https://unpkg.com/alpinejs@3.14.3/dist/cdn.min.js'
+    integrity='sha512-ZVf/lRjmZflPdIT4hvK4g1T6WupvrXtoTAM86z3S+5En7AhDVhBaxLRF4blGftmzhhPigloA8EP8OTO/Aabmng=='
+    crossorigin='anonymous' defer></script>
+  <script src='https://unpkg.com/chart.js@4.4.5/dist/chart.umd.js'
+    integrity='sha512-XNs52BscOKpfZ1almlvP31tb4MXB6j+Y6KQOE3+nWODhP2DsptUifgb3d49vZRxga1yHLGx0b7Z9ezd4b/vUzQ=='
+    crossorigin='anonymous' defer></script>
+
   {% block title %}
   {% endblock title %}
+
   {% endblock head %}
 </head>
 
 <body>
   <nav class='container navbar navbar-expand-md'>
-    <div class='container-fluid' x-data='{ showSpinner: false, isMdOrSmaller: window.innerWidth < 768 }'>
-      <a class='navbar-brand' href='{{ url_for("main.index") }}' @click='showSpinner = true'>
+    <div class='container-fluid'>
+      <a class='navbar-brand' href='{{ url_for("main.index") }}'>
         eTalonu validācijas
-        <div id='spinner' class='spinner-grow spinner-grow-sm' role='status' x-cloak x-show='showSpinner'
-          :class='{ "d-none": isMdOrSmaller }'><span class='visually-hidden'>Loading...</span></div>
       </a>
       <button class='navbar-toggler' type='button' data-bs-toggle='offcanvas' data-bs-target='#offcanvasNavbar'
         aria-controls='offcanvasNavbar'>
@@ -48,8 +60,6 @@
       <div class='offcanvas offcanvas-end' tabindex='-1' id='offcanvasNavbar' aria-labelledby='offcanvasNavbarLabel'>
         <div class='offcanvas-header'>
           <h5 class='offcanvas-title' id='offcanvasNavbarLabel'>Izvēlne</h5>
-          <div id='spinner' class='spinner-grow spinner-grow-sm' role='status' x-cloak x-show='showSpinner'><span
-              class='visually-hidden'>Loading...</span></div>
           <button type='button' class='btn-close' data-bs-dismiss='offcanvas' aria-label='Close'></button>
         </div>
         <div class='offcanvas-body'>
@@ -59,21 +69,20 @@
             </li>
             <li class='nav-item'>
               <a class='nav-link {{ "active" if request.path == url_for("main.routes") }}'
-                href='{{ url_for("main.routes") }}' @click='showSpinner = true'>Populārākie maršruti</a>
+                href='{{ url_for("main.routes") }}'>Populārākie maršruti</a>
             </li>
             <li class='nav-item'>
               <hr class='d-md-none my-2'>
             </li>
             <li class='nav-item'>
               <a class='nav-link {{ "active" if request.path == url_for("main.times") }}'
-                href='{{ url_for("main.times") }}' @click='showSpinner = true'>Braucieni stundā</a>
+                href='{{ url_for("main.times") }}'>Braucieni stundā</a>
             </li>
             <li class='nav-item'>
               <hr class='d-md-none my-2'>
             </li>
             <li class='nav-item'>
-              <a class='nav-link' href='{{ url_for("main.toggle_theme", current_page=request.path) }}'
-                @click='showSpinner = true'>
+              <a class='nav-link' href='{{ url_for("main.toggle_theme", current_page=request.path) }}'>
                 {% if session.get('theme') == 'dark' %}
                 ☀️<span class='d-md-none'>Gaišais motīvs</span>
                 {% else %}
@@ -90,6 +99,13 @@
     {% block page_content %}
     {% endblock page_content %}
   </main>
+  <script>
+    function clearSessionStorage() {
+      sessionStorage.clear(); // Clearing the saved start_date and end_date before navigating to new page
+    }
+
+    window.addEventListener('beforeunload', clearSessionStorage);
+  </script>
   {% block scripts %}
   {% endblock scripts %}
 </body>

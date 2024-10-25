@@ -6,6 +6,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
     '''Base configuration'''
     SECRET_KEY = os.environ.get('SECRET_KEY')
+    SESSION_COOKIE_SAMESITE = 'Strict'
 
     @staticmethod
     def init_app(app):
@@ -27,6 +28,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     '''Production configuration'''
     DATABASE = 'data.duckdb'
+    SESSION_COOKIE_SECURE = True
 
 
 config = {
