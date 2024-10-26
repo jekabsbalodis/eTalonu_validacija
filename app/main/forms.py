@@ -11,6 +11,7 @@ from wtforms.validators import DataRequired
 
 def date_range_check(self, field):
     '''Validator to check if selected date is in valid date range'''
+
     with duckdb.connect(current_app.config['DATABASE'], read_only=True) as con:
         date_range = con.sql('''
                     SELECT
@@ -28,6 +29,7 @@ def date_range_check(self, field):
 
 class DateSelectForm(FlaskForm):
     '''Form to select the date and year for data display.'''
+
     start_date = DateField('Sākuma datums', validators=[
                            DataRequired(message='Lūdzu norādi datumu.'), date_range_check])
     end_date = DateField('Beigu datums', validators=[
@@ -36,6 +38,7 @@ class DateSelectForm(FlaskForm):
 
     def validate_end_date(self, field):
         '''Validator to check if end_date is after start_date'''
+
         if field.data < self.start_date.data:
             raise ValidationError(
                 'Beigu datums nevar būt pirms sākuma datuma.')
