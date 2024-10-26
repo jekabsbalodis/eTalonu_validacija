@@ -1,4 +1,4 @@
-{% macro render_date_field(field, min_date, max_date) %}
+{% macro render_date_field(field, min_date = none, max_date = none) %}
 
 {{ field.label(class_='form-label') }}
 {{ field(class_='form-control' + (' is-invalid' if field.errors else ''), **{'min': min_date, 'max': max_date,
@@ -12,5 +12,7 @@
 {% endmacro %}
 
 {% macro render_button(field) %}
+
 {{ field(class_='btn btn-primary') }}
+
 {% endmacro %}

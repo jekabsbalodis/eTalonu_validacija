@@ -1,9 +1,9 @@
-{% from 'macros/render_form.jinja' import render_date_field, render_button %}
+{% from 'macros/render_form_elements.jinja' import render_date_field, render_button %}
 
 <form x-data='dateForm()' x-init='$nextTick(() => validateDates())'
     x-target='dateSelectForm formValidEvent chartDataUrl' x-target.422='dateSelectForm' id='dateSelectForm'
-    @ajax:before='$store.loading = true' @ajax:error='$store.loading = false'
-    class='form' method='post' action='{{ urls[1] }}'>
+    @ajax:before='$store.loading = true' @ajax:error='$store.loading = false' class='form' method='post'
+    action='{{ urls[1] }}'>
     {{ form.hidden_tag() }}
     {{ render_date_field(form.start_date, time_range[0], time_range[1]) }}
     <div class='mb-3'>

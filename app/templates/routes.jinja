@@ -1,4 +1,4 @@
-{% from 'macros/render_script.jinja' import render_chart_script %}
+{% from 'macros/render_scripts.jinja' import manage_chart, manage_form_validation %}
 
 {% extends 'base.jinja' %}
 
@@ -14,5 +14,6 @@
 {% endblock page_content %}
 
 {% block scripts %}
-{{ render_chart_script('mostUsedRoutesChart', time_range[0], time_range[1]) }}
+{{ manage_chart('mostUsedRoutesChart') }}
+{{ manage_form_validation(time_range[0], time_range[1]) }}
 {% endblock scripts %}

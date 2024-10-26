@@ -1,7 +1,31 @@
-{% macro render_chart_script(canvas_id, min_date, max_date) %}
+{% macro manage_chart(canvas_id) %}
 
-<script src='{{ url_for("static", filename="js/chart.js") }}'></script>
 <script>
+    let chartInstance = null;
+
+    async function createChart(data_url, chartId) {
+        const response = await fetch(data_url);
+        const validations = await response.json();
+
+        chartInstance = new Chart(
+            document.getElementById(chartId),
+            {
+                type: 'bar',
+                data: validations
+            }
+        );
+        return chartInstance;
+    };
+
+    async function updateCreatedChart(data_url) {
+        const response = await fetch(data_url);
+        const validations = await response.json();
+
+        chartInstance.data = validations;
+
+        chartInstance.update();
+    };
+
     document.addEventListener('alpine:init', () => {
         Alpine.store('chart', {
             url: '',
@@ -13,18 +37,25 @@
             newChart() {
                 createChart(this.url, '{{ canvas_id }}').then(() => {
                     Alpine.store('loading', false);
-                    {# localStorage.clear(); #}
                 });
             },
 
             updateChart() {
                 updateCreatedChart(this.url).then(() => {
                     Alpine.store('loading', false);
-                    {# localStorage.clear(); #}
                 });
             }
         });
         Alpine.store('loading', true);
+    });
+</script>
+
+{% endmacro %}
+
+{% macro manage_form_validation(min_date, max_date) %}
+
+<script>
+    document.addEventListener('alpine:init', () => {
         Alpine.data('dateForm', function () {
             return {
                 start_date: this.$persist('').using(sessionStorage),
@@ -70,7 +101,6 @@
                 }
             };
         });
-
     });
 </script>
 
