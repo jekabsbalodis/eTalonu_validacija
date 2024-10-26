@@ -13,6 +13,7 @@ from app.data import data
 
 class RouteDataDict(TypedDict):
     '''Define model for the data to hold validations for each route and hour.'''
+
     label: str
     data: list[int]
 
@@ -20,6 +21,7 @@ class RouteDataDict(TypedDict):
 class ResultsDict(TypedDict):
     '''Define model for the dict containing
     all the results that will be passed to template for rendering.'''
+
     labels: list[int | str]
     datasets: list[RouteDataDict]
 
@@ -74,6 +76,7 @@ VALIDATIONS_BY_HOUR_QUERY: str = '''
 
 def get_query_results(query: str, start_date: date | None = None, end_date: date | None = None):
     '''Function to get database records.'''
+
     with duckdb.connect(current_app.config['DATABASE'], read_only=True) as con:
         last_month: tuple[date] = con.sql(
             LAST_MONTH_QUERY).fetchone()  # type: ignore
@@ -102,7 +105,7 @@ def get_dates() -> tuple[date | None, date | None]:  # date range to be precise
     return start_date, end_date
 
 
-@data.get('/data/routes')
+@data.get('/routes')
 def routes_data():
     '''Get data for routes page.'''
     start_date, end_date = get_dates()
@@ -118,7 +121,7 @@ def routes_data():
     return jsonify(results)
 
 
-@data.get('/data/times')
+@data.get('/times')
 def times_data():
     '''Get data for times page.'''
     start_date, end_date = get_dates()

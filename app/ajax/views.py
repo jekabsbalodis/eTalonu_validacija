@@ -37,14 +37,14 @@ def ajax_date_form(data_route: str, ajax_route: str) -> Response:
     return response
 
 
-@ajax.post('/ajax/routes')
+@ajax.post('/routes')
 def routes_ajax():
     '''Handle date form in routes view.'''
     res = ajax_date_form('data.routes_data', 'ajax.routes_ajax')
     return res
 
 
-@ajax.post('/ajax/times')
+@ajax.post('/times')
 def times_ajax():
     '''Handle date form in times view.'''
     res = ajax_date_form('data.times_data', 'ajax.times_ajax')

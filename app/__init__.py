@@ -23,8 +23,8 @@ def create_app(config_name):
     from .main import main as main_blueprint  # pylint: disable=import-outside-toplevel
     app.register_blueprint(main_blueprint)
     from .data import data as data_blueprint  # pylint: disable=import-outside-toplevel
-    app.register_blueprint(data_blueprint)
+    app.register_blueprint(data_blueprint, url_prefix='/data')
     from .ajax import ajax as ajax_blueprint  # pylint: disable=import-outside-toplevel
-    app.register_blueprint(ajax_blueprint)
+    app.register_blueprint(ajax_blueprint, url_prefix='/ajax')
 
     return app
