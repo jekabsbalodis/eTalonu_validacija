@@ -43,5 +43,5 @@ def load_data(data_folder: str):
     '''Load data from a CSV files into the database.'''
     with duckdb.connect(db_file) as con:
         con.sql(f'''
-                COPY validacijas FROM "{data_folder}\\ValidDati*.txt";
+                COPY validacijas FROM '{data_folder}\\ValidDati*.txt';
                 ''')

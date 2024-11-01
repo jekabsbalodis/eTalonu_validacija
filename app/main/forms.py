@@ -21,8 +21,7 @@ def date_range_check(self, field):
                         validacijas
                     ''').fetchone()
     if date_range:
-        out_of_range_error = f'Datubāzē pieejami ieraksti no {
-            date_range[0]} līdz {date_range[1]}.'
+        out_of_range_error = f'Datubāzē pieejami ieraksti no {date_range[0]} līdz {date_range[1]}.'
         if field.data < date_range[0] or field.data > date_range[1]:
             raise ValidationError(out_of_range_error)
 

@@ -20,11 +20,11 @@ TIME_RANGE_QUERY = '''
         '''
 
 
-def get_time_range() -> tuple[date]:
+def get_time_range() -> tuple[date, date]:
     '''Get time range for the currently available data'''
 
     with duckdb.connect(current_app.config['DATABASE'], read_only=True) as con:
-        time_range: tuple[date] = con.sql(
+        time_range: tuple[date, date] = con.sql(
             TIME_RANGE_QUERY).fetchone()  # type: ignore
     return time_range
 
@@ -61,7 +61,7 @@ def routes():
 @main.get('/times')
 def times():
     '''Render the page with statistics of hours when public transportation is used the most.'''
-    
+
     time_range = get_time_range()
     form = DateSelectForm()
     urls = (url_for('data.times_data'), url_for('ajax.times_ajax'))
