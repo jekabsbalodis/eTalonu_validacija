@@ -173,3 +173,10 @@ ValidDati*
 
 # Duckdb
 *.duckdb
+
+# Node stuff
+node_modules/
+
+# CSS and js files
+app/static/css/
+app/static/js/

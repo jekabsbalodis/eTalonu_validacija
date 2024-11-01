@@ -1,6 +1,6 @@
-{% from 'macros/render_scripts.jinja' import manage_chart, manage_form_validation %}
-
 {% extends 'base.jinja' %}
+
+{% set canvas_id = 'mostUsedRoutesChart' %}
 
 {% block title %}
 <title>eTalonu validācijas - Populārākie maršruti</title>
@@ -8,12 +8,11 @@
 
 {% block page_content %}
 
-{% include 'partials/date_select_form.jinja' %}
-<canvas id='mostUsedRoutesChart'></canvas>
+<div class='flex flex-col sm:flex-row gap-6'>
+    {% include 'partials/date_select_form.jinja' %}
+    <div class='w-full sm:w-2/3 md:w-3/4 lg:w-4/5'>
+        <canvas class='w-full h-auto' id='{{ canvas_id }}'></canvas>
+    </div>
+</div>
 
 {% endblock page_content %}
-
-{% block scripts %}
-{{ manage_chart('mostUsedRoutesChart') }}
-{{ manage_form_validation(time_range[0], time_range[1]) }}
-{% endblock scripts %}

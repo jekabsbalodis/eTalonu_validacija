@@ -1,27 +1,31 @@
-{% from 'macros/render_form_elements.jinja' import render_date_field, render_button %}
+{% from 'macros/render_form_elements.jinja' import render_date_field %}
 
-<form x-data='dateForm()' x-init='$nextTick(() => validateDates())'
-    x-target='dateSelectForm formValidEvent chartDataUrl' x-target.422='dateSelectForm' id='dateSelectForm'
-    @ajax:before='$store.loading = true' @ajax:error='$store.loading = false' class='form' method='post'
-    action='{{ urls[1] }}'>
-    {{ form.hidden_tag() }}
-    {{ render_date_field(form.start_date, time_range[0], time_range[1]) }}
-    <div class='mb-3'>
-        {{ render_date_field(form.end_date, time_range[0], time_range[1]) }}
+<div class='w-full sm:w-1/3 md:w-1/4 lg:w-1/5'>
+    <form x-data='formValidationManagement("{{ time_range[0] }}","{{ time_range[1] }}")'
+        x-target='dateSelectForm formValidEvent chartDataUrl' x-target.422='dateSelectForm' id='dateSelectForm'
+        @ajax:before='$store.chart.loading = true' @ajax:error='$store.chart.loading = false' method='post'
+        action='{{ urls[1] }}'>
+        {{ form.hidden_tag() }}
+        <div id='start_date_field'>
+            {{ render_date_field(form.start_date, time_range[0], time_range[1]) }}
+        </div>
+        <div id='end_date_field' class='mb-3'>
+            {{ render_date_field(form.end_date, time_range[0], time_range[1]) }}
+        </div>
+        <button id='submit' type='submit' class='btn btn-primary w-full max-w-xs'>
+            <span class='absolute'>Atlasīt</span><span class='relative left-8 inline-block align-middle'>
+                <span x-cloak x-show='$store.chart.loading' class='loading loading-spinner loading-xs'></span>
+            </span>
+        </button>
+    </form>
+    <div id='chartDataUrl' x-init='$store.chart.setUrl("{{ urls[0] }}")'></div>
+    <div id='formValidEvent'>
+        {% if post_request_successful %}
+        <div x-init='$dispatch("form:validated")'></div>
+        {% else %}
+        {% endif %}
     </div>
-    {{ render_button(form.submit) }}
-    <div class='spinner-border spinner-border-sm text-primary' role='status' x-data x-cloak
-        :class='$store.loading ? "d-inline-flex" : "d-none"'>
-        <span class='visually-hidden'>Loading...</span>
+    <div x-init='$nextTick(() => {$store.chart.newChart("{{ canvas_id }}")})'
+        @form:validated.window='$nextTick(() => {$store.chart.updateChart()})'>
     </div>
-</form>
-<div id='chartDataUrl' x-init='$store.chart.setUrl("{{ urls[0] }}")'></div>
-<div id='formValidEvent'>
-    {% if post_request_successful %}
-    <div x-init='$dispatch("form:validated")'></div>
-    {% else %}
-    {% endif %}
-</div>
-<div x-init='$nextTick(() => {$store.chart.newChart()})'
-    @form:validated.window='$nextTick(() => {$store.chart.updateChart()})'>
 </div>
