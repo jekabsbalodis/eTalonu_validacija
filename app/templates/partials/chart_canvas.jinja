@@ -1,0 +1,9 @@
+<!-- Rendered chart -->
+<figure class='image is-4by3'>
+    <canvas id='{{ canvas_id }}' aria-label='Validāciju datu grafiks' role='img' x-init='
+                $store.chart.setUrl("{{ urls[0] }}");
+                $nextTick(() => {$store.chart.newChart("{{ canvas_id }}")});'>
+    </canvas>
+</figure>
+<!-- Button to reset chart zoom -->
+<button x-data class='button is-small' x-on:click='$store.chart.resetChartZoom()'>Reset zoom</button>

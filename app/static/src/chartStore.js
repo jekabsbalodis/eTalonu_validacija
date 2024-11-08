@@ -1,6 +1,7 @@
-import { Chart, BarController, BarElement, CategoryScale, LinearScale, Colors } from 'chart.js';
+import { Chart, BarController, BarElement, CategoryScale, LinearScale, Colors, Legend, Tooltip } from 'chart.js';
+import zoomPlugin from 'chartjs-plugin-zoom';
 
-Chart.register(BarController, BarElement, CategoryScale, LinearScale, Colors);
+Chart.register(BarController, BarElement, CategoryScale, LinearScale, Colors, Legend, Tooltip, zoomPlugin);
 let chartInstance = null;
 
 export const chartStore = {
@@ -10,7 +11,11 @@ export const chartStore = {
     init() { this.loading = true; },
     destroy() { chartInstance.destroy(); },
 
-    setUrl(newUrl) { this.dataUrl = newUrl; },
+    setUrl(baseUrl, startDate, endDate) {
+        const encdodedStartDate = encodeURIComponent(startDate);
+        const encdodedEndDate = encodeURIComponent(endDate);
+        this.dataUrl = `${baseUrl}?start_date=${encdodedStartDate}&end_date=${encdodedEndDate}`;
+    },
 
     async fetchChartData() {
         try {
@@ -28,11 +33,37 @@ export const chartStore = {
             const validations = await this.fetchChartData();
             if (!validations) return;
 
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
             chartInstance = new Chart(
                 document.getElementById(canvasId),
                 {
                     type: 'bar',
-                    data: validations
+                    data: validations,
+                    options: {
+                        aspectRatio: (4 / 3),
+                        plugins: {
+                            zoom: {
+                                pan: {
+                                    enabled: true,
+                                    mode: 'x',
+                                    modifierKey: 'ctrl'
+                                },
+                                zoom: {
+                                    wheel: {
+                                        enabled: true,
+                                        modifierKey: 'ctrl'
+                                    },
+                                    pinch: {
+                                        enabled: true
+                                    },
+                                    mode: 'x'
+                                }
+                            }
+                        }
+                    }
                 }
             );
         } catch (error) {
@@ -48,11 +79,18 @@ export const chartStore = {
             if (!validations || !chartInstance) return;
 
             chartInstance.data = validations;
+            chartInstance.resetZoom();
             chartInstance.update();
         } catch (error) {
             console.error('Neizdevās atsvaidzināt grafiku', error);
         } finally {
             this.loading = false;
+        }
+    },
+
+    resetChartZoom() {
+        if (chartInstance) {
+            chartInstance.resetZoom();
         }
     }
 };

@@ -1,3 +1,6 @@
 {
     "python.terminal.activateEnvironment": false,
+    "css.styleSheets": [
+        "app/static/css/main.css"
+    ]
 }

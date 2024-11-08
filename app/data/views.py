@@ -78,7 +78,7 @@ def get_query_results(query: str, start_date: date | None = None, end_date: date
     '''Function to get database records.'''
 
     with duckdb.connect(current_app.config['DATABASE'], read_only=True) as con:
-        last_month: tuple[date] = con.sql(
+        last_month: tuple[date, date] = con.sql(
             LAST_MONTH_QUERY).fetchone()  # type: ignore
 
         if start_date is not None and end_date is not None:

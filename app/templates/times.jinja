@@ -1,25 +1,25 @@
 {% extends 'base.jinja' %}
 
-{% set canvas_id = 'mostUsedRoutesChart' %}
+{% set canvas_id = 'validationsByHourChart' %}
 
 {% block title %}
-<title>eTalonu validācijas - Populārākie maršruti</title>
+<title>eTalonu validācijas - Braucieni stundā</title>
 {% endblock title %}
 
 {% block page_content %}
 
 <section class='section'>
-    <h1 class='title is-4'>Validāciju skaits katrā Rīgas Satiksmes maršrutā</h1>
+    <h1 class='title is-4'>Validāciju skaits sabiedriskajā transportā ik stundu</h1>
     <p class='subtitle is-6'> Grafikā tiek attēloti dati par pēdējo pieejamo mēnesi, bet vari arī izvēlēties citu laika
         periodu.</p>
     <div class='columns'>
         <div class='column is-4'>
-            <!-- Date selection form -->
             {% include 'partials/date_select_form.jinja' %}
         </div>
         <div class='column'>
             {% include 'partials/chart_canvas.jinja' %}
         </div>
+    </div>
 </section>
 
 {% endblock page_content %}

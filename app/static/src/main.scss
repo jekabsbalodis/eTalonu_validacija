@@ -1,0 +1,31 @@
+$teal: #10bd91;
+$purple: #35108a;
+
+@use 'bulma/sass/utilities' with ($family-primary: '' Cousine', sans-serif',
+    $primary: $teal,
+    $link: $purple);
+
+@forward 'bulma/sass/base';
+@forward 'bulma/sass/form';
+@forward 'bulma/sass/components/navbar';
+@forward 'bulma/sass/elements/button';
+@forward 'bulma/sass/elements/title';
+@forward 'bulma/sass/elements/icon';
+@forward 'bulma/sass/elements/image';
+@forward 'bulma/sass/elements/tag';
+@forward 'bulma/sass/elements/box';
+@forward 'bulma/sass/grid/columns';
+@forward 'bulma/sass/helpers/visibility';
+@forward 'bulma/sass/helpers/typography';
+@forward 'bulma/sass/helpers/flexbox';
+@forward 'bulma/sass/helpers/color';
+@forward 'bulma/sass/layout/container';
+@forward 'bulma/sass/layout/section';
+
+@forward 'bulma/sass/themes';
+
+$fa-font-path: '../src/fontawesome/webfonts';
+@import 'fontawesome/scss/fontawesome.scss';
+@import 'fontawesome/scss/solid.scss';
+
+@import url('https://fonts.googleapis.com/css2?family=Cousine:wght@400;700&display=swap');

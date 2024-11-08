@@ -1,20 +1,41 @@
 {% macro render_date_field(field, min_date = none, max_date = none) %}
 
-
-{# {{ field.label(class_='form-control label-text') }} #}
-
-<label for='{{ field.label.field_id }}' class='form-control w-full max-w-xs'>
-    <div class='label'>
-        <span class='label-text'>{{ field.label.text }}</span>
+<div class='field is-horizontal'>
+    <div class='field-label is-small'>
+        {{ field.label(class_='label') }}
     </div>
-    <input class='input input-bordered valid:input-success invalid:input-error' id='{{ field.id }}' max='{{ max_date }}' min='{{ min_date }}'
-        name='{{ field.id }}' type='date' required value='{{ field.data }}' x-on:change='validateDates()'
-        x-ref='{{ field.id }}'>
-    <div class='label block'>
-        {% for error in field.errors %}
-        <span class='label-text-alt text-error block'>{{ error }}</span>
-        {% endfor %}
+    <div class='field-body'>
+        <div class='field'>
+            <p class='control {{ "has-icons-right" if field.errors }}'
+                x-bind:class='{"has-icons-right": {{ "startDateError" if field.id == "start_date" else "endDateError" }}}'>
+                <input class='input {{ "is-danger" if field.errors }}' id='{{ field.id }}' max='{{ max_date }}'
+                    min='{{ min_date }}' name='{{ field.id }}' type='date' required value='{{ field.data }}'
+                    x-on:change='validateDates()' x-ref='{{ field.id }}'>
+                <!-- Server rendered error icon -->
+                {% if field.errors %}
+                <span class='icon is-small is-right has-text-danger'>
+                    <i class='fa-solid fa-circle-exclamation'></i>
+                </span>
+                {% endif %}
+                <!-- Client side rendered error icon -->
+                <span class='icon is-small is-right has-text-danger'
+                    x-show='{{ "startDateError" if field.id == "start_date" else "endDateError" }}'>
+                    <i class='fa-solid fa-circle-exclamation'></i>
+                </span>
+
+            </p>
+            <!-- Server rendered error messages -->
+            {% if field.errors %}
+            {% for error in field.errors %}
+            <p class='help is-danger'>{{ error }}</p>
+            {% endfor %}
+            {% endif %}
+            <!-- Client side rendered error messages -->
+            <p class='help is-danger' x-transition
+                x-show='{{ "startDateError" if field.id == "start_date" else "endDateError" }}'
+                x-text='{{ "startDateError" if field.id == "start_date" else "endDateError" }}'></p>
+        </div>
     </div>
-</label>
+</div>
 
 {% endmacro %}

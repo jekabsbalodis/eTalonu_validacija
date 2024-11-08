@@ -180,3 +180,4 @@ node_modules/
 # CSS and js files
 app/static/css/
 app/static/js/
+app/static/src/fontawesome
