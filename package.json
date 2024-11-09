@@ -4,6 +4,7 @@
     "node": "23.x"
   },
   "devDependencies": {
+    "@alpinejs/persist": "^3.14.3",
     "@fortawesome/fontawesome-free": "^6.6.0",
     "alpinejs": "^3.14.3",
     "bulma": "^1.0.2",

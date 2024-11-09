@@ -5,8 +5,7 @@ Includes theme toggling.
 from datetime import date
 
 import duckdb
-from flask import (current_app, redirect, render_template, request, session,
-                   url_for)
+from flask import current_app, render_template, url_for
 
 from app.main import main
 from app.main.forms import DateSelectForm
@@ -49,18 +48,6 @@ def render_page(template: str, data_url: str, form_url: str):
             url_for(data_url))
 
     return render_template(template, urls=urls, form=form, time_range=time_range)
-
-
-@main.get('/toggle-theme')
-def toggle_theme():
-    '''Toggle between light and dark themes.'''
-
-    current_theme = session.get('theme')
-    if current_theme == 'dark':
-        session['theme'] = 'light'
-    else:
-        session['theme'] = 'dark'
-    return redirect(request.args.get('current_page') or '/')
 
 
 @main.get('/')

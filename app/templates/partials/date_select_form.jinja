@@ -1,5 +1,5 @@
 {% from 'macros/render_form_elements.jinja' import render_date_field %}
-
+<!-- Date selection form -->
 <form class='box' x-data='formValidationManagement("{{ time_range[0] }}","{{ time_range[1] }}")' id='dateSelectForm'
     method='post' action='{{ urls[1] }}' x-on:submit.prevent='$store.chart.loading = true;
                 $store.chart.setUrl("{{ urls[2] }}", $refs.start_date.value, $refs.end_date.value);
@@ -13,12 +13,16 @@
     <!-- Submit button -->
     <div class='field'>
         <div class='control'>
-            <button type='submit' class='button is-primary is-fullwidth'
+            <button type='submit' class='button is-primary is-fullwidth is-small'
                 x-bind:class='$store.chart.loading ? "is-loading" : ""'>
                 Atlasīt
             </button>
         </div>
     </div>
 </form>
-<p class='is-size-7'>Piezīme: uz datora ar taustiņu <span class='tag'>Ctrl</span> un peles ritenīti vari pietuvināt
-    grafiku. Ar <span class='tag'>Ctrl</span> un kreiso peles pogu vari pārbīdīt grafiku</p>
+<div class='is-size-7 has-text-grey'>
+    <ul>
+        <li><span class='tag is-light'>Ctrl</span> + peles ritenītis - pietuvināt</li>
+        <li><span class='tag is-light'>Ctrl</span> + kreisā poga - pārbīdīt</li>
+    </ul>
+</div>

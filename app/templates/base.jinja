@@ -1,9 +1,5 @@
 <!DOCTYPE html>
-{% if session.get('theme') == 'dark' %}
-<html lang='lv' data-theme='dark'>
-{% else %}
-<html lang='lv' data-theme='light'>
-{% endif %}
+<html lang='lv'>
 
 
 <head>
@@ -11,6 +7,19 @@
 
   <meta charset='utf-8' />
   <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no' />
+
+  <script>
+    const darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
+    const isAuto = JSON.parse(localStorage.getItem('isAuto') || 'true');
+
+    if (isAuto) {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+    } else {
+      document.documentElement.dataset.theme = darkMode ? 'dark' : 'light';
+    }
+  </script>
+
 
   <link rel='icon' href='{{ url_for("static", filename="favicon.ico") }}' type='image/x-icon' />
 
@@ -37,9 +46,8 @@
       <div class='navbar-brand'>
         <a href='{{ url_for("main.index") }}' class='navbar-item'>eTalonu validācijas</a>
         <!-- Button to display navigation menu on touch devices -->
-        <button class='navbar-burger' aria-label='Izvēlne' aria-expanded='false' x-on:click='menuOpen = !menuOpen'
-          x-on:click.outside='menuOpen = false' x-bind:class='menuOpen ? "is-active" : ""'
-          x-bind:aria-expanded='menuOpen ? "true" : "false"'>
+        <button class='navbar-burger' aria-label='Izvēlne' x-on:click='menuOpen = !menuOpen'
+          x-on:click.outside='menuOpen = false' x-bind:class='{"is-active": menuOpen}' x-bind:aria-expanded='menuOpen'>
           <span aria-hidden='true'></span>
           <span aria-hidden='true'></span>
           <span aria-hidden='true'></span>
@@ -47,18 +55,39 @@
         </button>
       </div>
       <!-- Links -->
-      <div class='navbar-menu' x-bind:class='menuOpen ? "is-active" : ""'>
+      <div class='navbar-menu' x-bind:class='{"is-active": menuOpen}'>
         <div class='navbar-end'>
           <a href='{{ url_for("main.routes") }}'
             class='navbar-item {{ "is-underlined" if request.path == url_for("main.routes") }}'>Populārākie maršruti</a>
           <a href='{{ url_for("main.times") }}'
             class='navbar-item {{ "is-underlined" if request.path == url_for("main.times") }}'>Braucieni stundā</a>
-          <a href='{{ url_for("main.toggle_theme", current_page=request.path) }}' class='navbar-item'>
-            {% if session.get('theme') == 'dark' %}
-            ☀️<span class='is-hidden-desktop'> Gaišais motīvs</span>
-            {% else %}
-            🌑<span class='is-hidden-desktop'> Tumšais motīvs</span>
-            {% endif %}</a>
+          <!-- Dropdown for theme selection -->
+          <div class='navbar-item has-dropdown is-hoverable'>
+            <a class='navbar-item' x-transition
+              x-show='($store.darkMode.on == false & $store.darkMode.isAuto == false)'><span class='icon-text'><span
+                  class='icon has-text-warning'><i class='fa-solid fa-sun'></i></span><span class='is-hidden-desktop'>
+                  Gaišais motīvs</span></span></a>
+            <a class='navbar-item' x-transition
+              x-show='($store.darkMode.on == true & $store.darkMode.isAuto == false)'><span class='icon-text'><span
+                  class='icon has-text-link'><i class='fa-solid fa-moon'></i></span><span class='is-hidden-desktop'>
+                  Tumšais
+                  motīvs</span></span></a>
+            <a class='navbar-item' x-transition x-show='$store.darkMode.isAuto == true'><span class='icon-text'><span
+                  class='icon has-text-primary'><i class='fa-solid fa-desktop'></i></span><span
+                  class='is-hidden-desktop'>
+                  Noklusējuma</span></span></a>
+            <div class='navbar-dropdown is-right'>
+              <a class='navbar-item' x-on:click='$store.darkMode.setLight()'><span class='icon has-text-warning'><i
+                    class='fa-solid fa-sun'></i></span> Gaišais
+                motīvs</a>
+              <a class='navbar-item' x-on:click='$store.darkMode.setDark()'><span class='icon has-text-link'><i
+                    class='fa-solid fa-moon'></i></span> Tumšais
+                motīvs</a>
+              <a class='navbar-item' x-on:click='$store.darkMode.setAuto()'><span class='icon has-text-primary'><i
+                    class='fa-solid fa-desktop'></i></span>
+                Noklusējums</a>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
