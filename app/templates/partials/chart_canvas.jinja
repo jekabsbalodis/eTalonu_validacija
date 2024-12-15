@@ -7,13 +7,13 @@
 </figure>
 <!-- Button to reset chart zoom -->
 <div class='buttons'>
-    <button x-data class='button is-small is-info is-outlined' x-on:click='$store.chart.resetChartZoom()'>
-        Attiestatīt mērogu
-    </button>
     <button x-data class='button is-small is-info is-outlined' x-on:click='$store.chart.zoomIn()'>
         Pietuvināt
     </button>
     <button x-data class='button is-small is-info is-outlined' x-on:click='$store.chart.zoomOut()'>
         Attālināt
+    </button>
+    <button x-data class='button is-small is-info is-outlined' x-on:click='$store.chart.resetChartZoom()'>
+        Attiestatīt mērogu
     </button>
 </div>
