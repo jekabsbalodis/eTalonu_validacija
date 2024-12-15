@@ -57,7 +57,7 @@ export const chartStore = {
                                         modifierKey: 'ctrl'
                                     },
                                     pinch: {
-                                        enabled: true
+                                        enabled: false
                                     },
                                     mode: 'x'
                                 }
