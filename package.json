@@ -14,8 +14,8 @@
     "sass": "^1.80.6"
   },
   "scripts": {
-    "build-css": "sass --load-path=node_modules ./app/static/src/main.scss ./app/static/css/main.css --watch",
-    "build-js": "esbuild ./app/static/src/main.js --bundle --outfile=./app/static/js/bundle.js --watch",
+    "build-css": "sass --load-path=node_modules ./app/static/src/main.scss ./app/static/css/main-dev.css --watch",
+    "build-js": "esbuild ./app/static/src/main.js --bundle --outfile=./app/static/js/bundle-dev.js --watch",
     "minify-css": "sass --load-path=node_modules ./app/static/src/main.scss ./app/static/css/main.css --style=compressed",
     "minify-js": "esbuild ./app/static/src/main.js --bundle --outfile=./app/static/js/bundle.js --minify"
   }
