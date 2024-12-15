@@ -89,6 +89,18 @@ export const chartStore = {
         if (chartInstance) {
             chartInstance.resetZoom();
         }
+    },
+
+    zoomIn() {
+        if (chartInstance) {
+            chartInstance.zoom({ x: 1.1 });
+        }
+    },
+
+    zoomOut() {
+        if (chartInstance) {
+            chartInstance.zoom({ x: 2 - 1 / 0.9 });
+        }
     }
 };
 
