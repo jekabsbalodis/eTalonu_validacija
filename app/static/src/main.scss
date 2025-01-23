@@ -26,8 +26,8 @@ $purple: #35108a;
 
 @forward 'bulma/sass/themes';
 
-$fa-font-path: '../src/fontawesome/webfonts';
-@import 'fontawesome/scss/fontawesome.scss';
-@import 'fontawesome/scss/solid.scss';
+$fa-font-path: '../src/webfonts';
+@use '@fortawesome/fontawesome-free/scss/fontawesome.scss';
+@use '@fortawesome/fontawesome-free/scss/solid.scss';
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
