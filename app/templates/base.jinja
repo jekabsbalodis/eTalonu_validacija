@@ -9,15 +9,25 @@
   <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no' />
 
   <script>
-    const darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
-    const isAuto = JSON.parse(localStorage.getItem('isAuto') || 'true');
+    (function () {
+      const theme = localStorage.getItem('theme') || 'system';
+      const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    if (isAuto) {
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
-    } else {
-      document.documentElement.dataset.theme = darkMode ? 'dark' : 'light';
-    }
+      if (theme === 'dark' || (theme === 'system' && isSystemDark)) {
+        document.documentElement.dataset.theme = 'dark';
+      } else {
+        document.documentElement.dataset.theme = 'light';
+      }
+
+      localStorage.setItem('isSystemDark', isSystemDark);
+
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+        localStorage.setItem('isSystemDark', event.matches);
+        if (theme === 'system') {
+          document.documentElement.dataset.theme = event.matches ? 'dark' : 'light';
+        }
+      });
+    })();
   </script>
 
 
@@ -64,15 +74,15 @@
           <!-- Dropdown for theme selection -->
           <div class='navbar-item has-dropdown is-hoverable'>
             <a class='navbar-item' x-transition
-              x-show='($store.darkMode.on == false & $store.darkMode.isAuto == false)'><span class='icon-text'><span
+              x-show='$store.darkMode.theme == "light"'><span class='icon-text'><span
                   class='icon has-text-warning'><i class='fa-solid fa-sun'></i></span><span class='is-hidden-desktop'>
                   Gaišais motīvs</span></span></a>
             <a class='navbar-item' x-transition
-              x-show='($store.darkMode.on == true & $store.darkMode.isAuto == false)'><span class='icon-text'><span
+              x-show='$store.darkMode.theme == "dark"'><span class='icon-text'><span
                   class='icon has-text-link'><i class='fa-solid fa-moon'></i></span><span class='is-hidden-desktop'>
                   Tumšais
                   motīvs</span></span></a>
-            <a class='navbar-item' x-transition x-show='$store.darkMode.isAuto == true'><span class='icon-text'><span
+            <a class='navbar-item' x-transition x-show='$store.darkMode.theme == "system"'><span class='icon-text'><span
                   class='icon has-text-primary'><i class='fa-solid fa-desktop'></i></span><span
                   class='is-hidden-desktop'>
                   Noklusējuma</span></span></a>

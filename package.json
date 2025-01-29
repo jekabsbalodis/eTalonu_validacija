@@ -4,7 +4,6 @@
     "node": "23.x"
   },
   "devDependencies": {
-    "@alpinejs/persist": "^3.14.3",
     "@fortawesome/fontawesome-free": "^6.6.0",
     "alpinejs": "^3.14.3",
     "bulma": "^1.0.2",
@@ -14,8 +13,8 @@
     "sass": "^1.80.6"
   },
   "scripts": {
-    "build-css": "sass --load-path=node_modules ./app/static/src/main.scss ./app/static/css/main-dev.css --watch",
-    "build-js": "esbuild ./app/static/src/main.js --bundle --outfile=./app/static/js/bundle-dev.js --watch",
+    "build-css": "sass --load-path=node_modules ./app/static/src/main.scss ./app/static/css/main.css --watch",
+    "build-js": "esbuild ./app/static/src/main.js --bundle --outfile=./app/static/js/bundle.js --watch",
     "minify-css": "sass --load-path=node_modules ./app/static/src/main.scss ./app/static/css/main.css --style=compressed",
     "minify-js": "esbuild ./app/static/src/main.js --bundle --outfile=./app/static/js/bundle.js --minify"
   }

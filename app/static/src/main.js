@@ -1,49 +1,46 @@
 import Alpine from 'alpinejs';
-import persist from '@alpinejs/persist'
 import { chartStore } from './chartStore';
 import formValidation from './formValidation';
 
-Alpine.plugin(persist)
 
 Alpine.store('darkMode', {
-    on: Alpine.$persist(null).as('darkMode'),
-    isAuto: Alpine.$persist(true).as('isAuto'),
+    theme: localStorage.getItem('theme') || 'system',
+    isSystemDark: localStorage.getItem('isSystemDark') === 'true',
 
     init() {
-        if (localStorage.getItem('isAuto') === null) {
-            this.isAuto = true;
-        }
-
-        if (this.on === null) {
-            this.on = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        this.isSystemDark = mediaQuery.matches;
+        mediaQuery.addEventListener('change', (event) => {
+            this.isSystemDark = event.matches;
+            if (this.theme === 'system') {
+                this.updateTheme();
+            }
+        });
 
         this.updateTheme();
-
-        window.matchMedia('(prefers-color-scheme: dark)')
-            .addEventListener('change', (e) => {
-                if (this.isAuto) {
-                    this.on = e.matches;
-                    this.updateTheme();
-                }
-            });
     },
+
     setDark() {
-        this.isAuto = false;
-        this.on = true;
+        this.theme = 'dark';
         this.updateTheme();
     },
     setLight() {
-        this.isAuto = false;
-        this.on = false;
+        this.theme = 'light';
         this.updateTheme();
     },
     setAuto() {
-        this.isAuto = true;
-        this.on = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        this.theme = 'system';
         this.updateTheme();
     },
-    updateTheme() { document.documentElement.dataset.theme = this.on ? 'dark' : 'light' }
+    updateTheme() {
+        let theme = 'light';
+        if (this.theme === 'dark' || (this.theme === 'system' && this.isSystemDark)) {
+            theme = 'dark';
+        }
+        localStorage.setItem('theme', this.theme);
+        localStorage.setItem('isSystemDark', this.isSystemDark);
+        document.documentElement.dataset.theme = theme;
+    }
 });
 
 Alpine.store('chart', chartStore);
