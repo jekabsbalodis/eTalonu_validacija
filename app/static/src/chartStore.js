@@ -12,9 +12,14 @@ export const chartStore = {
     destroy() { chartInstance.destroy(); },
 
     setUrl(baseUrl, startDate, endDate) {
-        const encdodedStartDate = encodeURIComponent(startDate);
-        const encdodedEndDate = encodeURIComponent(endDate);
-        this.dataUrl = `${baseUrl}?start_date=${encdodedStartDate}&end_date=${encdodedEndDate}`;
+        if (startDate != undefined & endDate != undefined) {
+            const encdodedStartDate = encodeURIComponent(startDate);
+            const encdodedEndDate = encodeURIComponent(endDate);
+            this.dataUrl = `${baseUrl}?start_date=${encdodedStartDate}&end_date=${encdodedEndDate}`;
+        }
+        else {
+            this.dataUrl = `${baseUrl}`;
+        }
     },
 
     async fetchChartData() {
