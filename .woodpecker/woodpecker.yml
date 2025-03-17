@@ -1,0 +1,9 @@
+when:
+  - event: manual
+
+steps:
+  - name: build-container
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      dry-run: true
+      platforms: linux/amd64
