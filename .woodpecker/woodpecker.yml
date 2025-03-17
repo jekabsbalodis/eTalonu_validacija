@@ -3,7 +3,7 @@ when:
 
 steps:
   - name: build-container
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-docker-buildx:latest
     settings:
       dry-run: true
       platforms: linux/amd64
