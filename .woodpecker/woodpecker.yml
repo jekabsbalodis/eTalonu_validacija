@@ -5,5 +5,11 @@ steps:
   - name: build-container
     image: woodpeckerci/plugin-docker-buildx:latest
     settings:
-      dry-run: true
+      # dry-run: true
       platforms: linux/amd64
+      repo:
+        from_secret: repo
+      username:
+        from_secret: repo_username
+      password:
+        from_secret: repo_password
