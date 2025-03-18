@@ -10,7 +10,6 @@ run uv sync
 FROM python:3.13-slim AS production
 
 RUN useradd --create-home validacijas
-USER validacijas
 
 WORKDIR /validacijas
 
@@ -24,6 +23,8 @@ ENV FLASK_APP=etalonu_validacijas.py
 ENV FLASK_CONFIG=docker
 
 RUN chown -R validacijas:validacijas ./
+
+USER validacijas
 
 EXPOSE 5000
 ENTRYPOINT ["./boot.sh"]
