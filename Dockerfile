@@ -1,13 +1,13 @@
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
+COPY ./pyproject.toml .
+RUN uv add gunicorn
+RUN uv sync
+
 RUN useradd --create-home validacijas
 USER validacijas
 
 WORKDIR /validacijas
-
-COPY ./pyproject.toml .
-RUN uv add gunicorn
-RUN uv sync
 
 COPY app app
 COPY etalonu_validacijas.py config.py ./
