@@ -1,23 +1,29 @@
-FROM python:3.13.1-slim
+# Build stage
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
 
-RUN useradd validacijas
+COPY ./pyproject.toml .
 
-WORKDIR /home/validacijas
+RUN uv add gunicorn
+run uv sync
 
-COPY requirements.txt requirements.txt
-RUN python -m venv venv
-RUN venv/bin/pip install -r requirements.txt
-RUN venv/bin/pip install gunicorn
+# Production stage
+FROM python:3.13-slim AS production
+
+RUN useradd --create-home validacijas
+USER validacijas
+
+WORKDIR /validacijas
 
 COPY app app
 COPY etalonu_validacijas.py config.py boot.sh ./
 RUN chmod +x boot.sh
 
+COPY --from=builder /.venv /.venv
+
 ENV FLASK_APP=etalonu_validacijas.py
 ENV FLASK_CONFIG=docker
 
 RUN chown -R validacijas:validacijas ./
-USER validacijas
 
 EXPOSE 5000
 ENTRYPOINT ["./boot.sh"]

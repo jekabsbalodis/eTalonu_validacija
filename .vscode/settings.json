@@ -2,5 +2,6 @@
     "python.terminal.activateEnvironment": false,
     "css.styleSheets": [
         "app/static/css/main.css"
-    ]
+    ],
+    "python.analysis.autoImportCompletions": true
 }
