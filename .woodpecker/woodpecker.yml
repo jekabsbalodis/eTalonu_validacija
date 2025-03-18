@@ -13,4 +13,3 @@ steps:
         from_secret: repo_username
       password:
         from_secret: repo_password
-      target: production
