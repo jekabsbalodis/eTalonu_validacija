@@ -17,7 +17,7 @@ COPY app app
 COPY etalonu_validacijas.py config.py boot.sh ./
 RUN chmod +x boot.sh
 
-COPY --from=builder /.venv /.venv
+COPY --from=builder /.venv .venv
 
 ENV FLASK_APP=etalonu_validacijas.py
 ENV FLASK_CONFIG=docker
