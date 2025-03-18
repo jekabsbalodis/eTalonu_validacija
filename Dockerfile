@@ -4,7 +4,7 @@ FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
 COPY ./pyproject.toml .
 
 RUN uv add gunicorn
-run uv sync
+RUN uv sync
 
 # Production stage
 FROM python:3.13-slim AS production
