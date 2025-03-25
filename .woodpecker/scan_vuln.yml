@@ -1,0 +1,8 @@
+when:
+  - event: manual
+
+steps:
+  - name: scan-vulnerabilities
+    image: aquasec/trivy:latest
+    commands:
+        - trivy repository . --scanner vuln --exit-code 1
