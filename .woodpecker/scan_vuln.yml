@@ -1,9 +1,0 @@
-when:
-  - event: cron
-    cron: "Scan vulnerabilities"
-
-steps:
-  - name: scan-vulnerabilities
-    image: aquasec/trivy:latest
-    commands:
-        - trivy repository . --scanners vuln --exit-code 1
