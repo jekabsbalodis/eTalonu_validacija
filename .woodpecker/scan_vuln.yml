@@ -5,4 +5,4 @@ steps:
   - name: scan-vulnerabilities
     image: aquasec/trivy:latest
     commands:
-        - trivy repository . --scanner vuln --exit-code 1
+        - trivy repository . --scanners vuln --exit-code 1
