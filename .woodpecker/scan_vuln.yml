@@ -1,5 +1,6 @@
 when:
-  - event: manual
+  - event: cron
+    cron: */5 * * * *
 
 steps:
   - name: scan-vulnerabilities
