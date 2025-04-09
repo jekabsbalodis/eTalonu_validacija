@@ -1,0 +1,10 @@
+when:
+  event: cron
+  cron: "weekly"
+
+steps:
+  - name: scan vulnerabilities
+    image: woodpeckerci/plugin-trivy:latest
+    pull: true
+    # settings:
+    #   skip-dirs: docs
