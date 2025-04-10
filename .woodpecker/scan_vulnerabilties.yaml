@@ -4,7 +4,18 @@ when:
 
 steps:
   - name: scan vulnerabilities
-    image: woodpeckerci/plugin-trivy:latest
+    image: aquasec/trivy:latest
     pull: true
-    # settings:
-    #   skip-dirs: docs
+    commands:
+      - trivy repo --exit-code 1 --format template --template '@/contrib/html.tpl' -o report.html . --scanners vuln
+
+  - name: notify
+    image: alpine/httpie:latest
+    pull: true
+    when:
+      - status: failure
+    environment:
+      NTFY_URL:
+        from_secret: NTFY_URL
+    commands:
+      - https --ignore-stdin PUT $NTFY_URL 'title:${CI_REPO_NAME} scan results' filename:report.html @report.html priority:2 tags:warning
