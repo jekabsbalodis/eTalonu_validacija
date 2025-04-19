@@ -7,7 +7,7 @@ steps:
     image: aquasec/trivy:latest
     pull: true
     commands:
-      - trivy repo --exit-code 1 --format template --template '@/contrib/html.tpl' -o report.html . --scanners vuln
+      - trivy repo --exit-code 1 --format json -o report.json . --scanners vuln
 
   - name: notify
     image: alpine/httpie:latest
@@ -18,4 +18,4 @@ steps:
       NTFY_URL:
         from_secret: NTFY_URL
     commands:
-      - https --ignore-stdin PUT $NTFY_URL 'title:${CI_REPO_NAME} scan results' filename:report.html @report.html priority:2 tags:warning
+      - https --ignore-stdin PUT $NTFY_URL 'title:${CI_REPO_NAME} scan results' filename:${CI_REPO_NAME}_report.json @report.json priority:2 tags:warning 'Actions:view, Open explorer, https://dbsystel.github.io/trivy-vulnerability-explorer'
