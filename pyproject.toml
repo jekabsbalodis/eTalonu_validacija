@@ -5,7 +5,7 @@ description = "Display statistics of Riga city public transportation ticket vali
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "duckdb>=1.2.1",
+    "duckdb==1.2.2",
     "flask>=3.1.0",
     "flask-wtf>=1.2.2",
     "pandas>=2.2.3",
