@@ -1,7 +1,7 @@
 {
   "engines": {
-    "npm": "10.x",
-    "node": "23.x"
+    "npm": "11.x",
+    "node": "24.x"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
