@@ -9,7 +9,7 @@ on:
 
 jobs:
   scan:
-    runs-on: docker-tiny
+    runs-on: codeberg-tiny
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
   notify:
     needs: scan
     if: failure()
-    runs-on: docker-tiny
+    runs-on: codeberg-tiny
     steps:
       - name: Download report
         uses: actions/download-artifact@v4
