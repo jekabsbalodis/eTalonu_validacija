@@ -1,15 +1,13 @@
-# .forgejo/workflows/scan.yml
-
 name: Weekly Vulnerability Scan
 
 on:
   schedule:
-    - cron: '0 0 * * 0'  # weekly (Sunday at midnight UTC)
-  workflow_dispatch:      # allows manual trigger for testing
+    - cron: "0 0 * * 0" # weekly (Sunday at midnight UTC)
+  workflow_dispatch: # allows manual trigger for testing
 
 jobs:
   scan:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-tiny-lazy
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,18 +18,18 @@ jobs:
           args: repo --exit-code 1 --format json -o report.json . --scanners vuln
 
       - name: Upload report for later steps
-        uses: actions/upload-artifact@v3
+        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         with:
           name: trivy-report
           path: report.json
 
   notify:
     needs: scan
-    if: failure()
-    runs-on: codeberg-tiny
+    # if: failure()
+    runs-on: codeberg-tiny-lazy
     steps:
       - name: Download report
-        uses: actions/download-artifact@v3
+        uses: https://code.forgejo.org/forgejo/download-artifact@v4
         with:
           name: trivy-report
 
@@ -40,15 +38,10 @@ jobs:
           NTFY_URL: ${{ secrets.NTFY_URL }}
           CI_REPO_NAME: ${{ github.repository }}
         run: |
-          docker run --rm \
-            -e NTFY_URL \
-            -e CI_REPO_NAME \
-            -v $PWD:/data \
-            alpine/httpie:latest \
-            https --ignore-stdin PUT $NTFY_URL \
-              "title:${CI_REPO_NAME} scan results" \
-              "filename:${CI_REPO_NAME}_report.json" \
-              "@/data/report.json" \
-              "priority:2" \
-              "tags:warning" \
-              "Actions:view, Open explorer, https://dbsystel.github.io/trivy-vulnerability-explorer"
+          curl -X PUT "$NTFY_URL" \
+          -H "title: ${CI_REPO_NAME} scan results" \
+          -H "filename: ${CI_REPO_NAME}_report.json" \
+          -H "priority: 2" \
+          -H "tags: warning" \
+          -H "Actions: view, Open explorer, https://dbsystel.github.io/trivy-vulnerability-explorer" \
+          --data-binary "@report.json"
