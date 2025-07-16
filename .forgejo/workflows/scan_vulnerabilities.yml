@@ -39,4 +39,4 @@ jobs:
           CI_REPO_NAME: ${{ github.repository }}
         uses: docker://alpine/httpie:latest
         with:
-          args: https --ignore-stdin --url=$NTFY_URL --method=PUT 'title:${CI_REPO_NAME} scan results' filename:${CI_REPO_NAME}_report.json @report.json priority:2 tags:warning 'Actions:view, Open explorer, https://dbsystel.github.io/trivy-vulnerability-explorer' > /dev/null
+          args: https PUT $NTFY_URL 'title:${CI_REPO_NAME} scan results' filename:${CI_REPO_NAME}_report.json @report.json priority:2 tags:warning 'Actions:view, Open explorer, https://dbsystel.github.io/trivy-vulnerability-explorer' > /dev/null
