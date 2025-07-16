@@ -44,4 +44,5 @@ jobs:
           -H "priority: 2" \
           -H "tags: warning" \
           -H "Actions: view, Open explorer, https://dbsystel.github.io/trivy-vulnerability-explorer" \
-          --data-binary "@report.json"
+          --data-binary "@report.json" \
+          > /dev/null
