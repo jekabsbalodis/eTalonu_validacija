@@ -37,12 +37,6 @@ jobs:
         env:
           NTFY_URL: ${{ secrets.NTFY_URL }}
           CI_REPO_NAME: ${{ github.repository }}
-        run: |
-          curl -s -X PUT "$NTFY_URL" \
-          -H "title: ${CI_REPO_NAME} scan results" \
-          -H "filename: ${CI_REPO_NAME}_report.json" \
-          -H "priority: 2" \
-          -H "tags: warning" \
-          -H "Actions: view, Open explorer, https://dbsystel.github.io/trivy-vulnerability-explorer" \
-          --data-binary "@report.json" \
-          > /dev/null
+        uses: docker://alpine/httpie:latest
+        with:
+          args: https --ignore-stdin PUT $NTFY_URL 'title:${CI_REPO_NAME} scan results' filename:${CI_REPO_NAME}_report.json @report.json priority:2 tags:warning 'Actions:view, Open explorer, https://dbsystel.github.io/trivy-vulnerability-explorer' > /dev/null
