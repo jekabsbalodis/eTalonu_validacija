@@ -18,6 +18,7 @@ jobs:
           args: repo --exit-code 1 --format json -o report.json . --scanners vuln
 
       - name: Upload report for later steps
+        if: "!cancelled()"
         uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         with:
           name: trivy-report
