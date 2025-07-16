@@ -20,7 +20,7 @@ jobs:
           args: repo --exit-code 1 --format json -o report.json . --scanners vuln
 
       - name: Upload report for later steps
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: trivy-report
           path: report.json
@@ -31,7 +31,7 @@ jobs:
     runs-on: codeberg-tiny
     steps:
       - name: Download report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: trivy-report
 
