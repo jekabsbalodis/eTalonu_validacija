@@ -25,7 +25,7 @@ jobs:
 
   notify:
     needs: scan
-    # if: failure()
+    if: failure()
     runs-on: codeberg-tiny-lazy
     steps:
       - name: Download report
