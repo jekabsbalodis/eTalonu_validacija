@@ -1,5 +1,0 @@
-app/static/src/*
-!app/static/favicon.ico
-!app/static/js/
-!app/static/css/
-!app/static/webfonts/

@@ -1,5 +1,20 @@
 # eTalonu Validācija
 
-This is the code for the website [validacijas.balodis.id.lv](https://validacijas.balodis.id.lv/) that displays **data of Riga city public transport ticket (eTalons) validations**.
+This repository powers the Streamlit Community Cloud app that visualizes **Riga city public‑transport ticket (eTalons) validation data**.
 
-The website contains charts about most used routes and usage during different hours of the day. Data for the charts is obtained from the [Latvia's Open data portal](https://data.gov.lv/dati/eng/dataset/e-talonu-validaciju-dati-rigas-satiksme-sabiedriskajos-transportlidzeklos).
+## What the app shows
+
+- *To be implemented*
+
+All visualizations are rendered directly in the Streamlit interface, hosted on Streamlit Community Cloud, so anyone can explore the data without installing anything locally.
+
+## Data source
+
+The validation records are pulled from **Latvia’s Open Data portal**:
+
+- Dataset: *e‑talonu validāciju dati – Rīgas satiksme sabiedriskajos transportlīdzekļos*  
+- URL: <https://data.gov.lv/dati/eng/dataset/e-talonu-validaciju-dati-rigas-satiksme-sabiedriskajos-transportlidzeklos>  
+
+## How it works
+
+1. *To be implemented*
