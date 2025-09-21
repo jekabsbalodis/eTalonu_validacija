@@ -1,9 +1,16 @@
+"""
+Callback functions to pass to streamlit widgets.
+"""
+
 import streamlit as st
 
 
 def on_routes_change(available_routes: list[str]):
     """
     Callback to uncheck 'select all' when routes are manually deselected.
+
+    Args:
+        available_routes: List of available route options.
     """
 
     if len(st.session_state.selected_routes) < len(available_routes):
@@ -13,6 +20,9 @@ def on_routes_change(available_routes: list[str]):
 def on_checkbox_change(available_routes: list[str]):
     """
     Callback to select all routes when checkbox is checked.
+
+    Args:
+        available_routes: List of available route options.
     """
     if st.session_state.routes_cb:
         st.session_state.selected_routes = available_routes
