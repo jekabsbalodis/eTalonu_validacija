@@ -6,10 +6,31 @@ import duckdb
 import streamlit as st
 
 
-@st.cache_resource()
-def duckdb_conn() -> duckdb.DuckDBPyConnection:
+class DatabaseConnection:
     """
-    Create cached DuckDB in-memory connection.
+    DuckDB connection wrapper with caching and some utility methods.
     """
-    conn = duckdb.connect()
-    return conn
+
+    def __init__(self):
+        self._conn: duckdb.DuckDBPyConnection | None = None
+
+    @property
+    def conn(self) -> duckdb.DuckDBPyConnection:
+        """
+        Get the cached DuckDB connection.
+        """
+
+        if self._conn is None:
+            self._conn = self._create_connection()
+        return self._conn
+
+    @staticmethod
+    @st.cache_resource
+    def _create_connection() -> duckdb.DuckDBPyConnection:
+        """
+        Create cached DuckDB in-memory connection.
+        """
+        return duckdb.connect()
+
+
+database = DatabaseConnection()

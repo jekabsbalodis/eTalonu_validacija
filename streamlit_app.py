@@ -7,6 +7,7 @@ Loads CSV data from data.gov.lv into DuckDB and displays charts.
 import streamlit as st
 
 from callbacks import on_checkbox_change, on_routes_change
+from database import database
 from month_data import available_months
 
 available_routes = ['Tm 1', 'Tm 7']
