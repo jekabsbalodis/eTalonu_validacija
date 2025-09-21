@@ -28,14 +28,41 @@ if max_month:
     last_day: int = calendar.monthrange(max_month[0], max_month[1])[1]
     max_date = datetime.date(max_month[0], max_month[1], last_day)
 
-selected_dates = st.date_input(
-    label='Periods',
-    help='Izvēlies laika periodu, par kuru atlasīt datus',
-    value=(),
-    min_value=min_date,
-    max_value=max_date,
-    width=320,
-)
+with st.sidebar:
+    st.header('Vizualizāciju filtri')
 
+    selected_dates = st.date_input(
+        label='Laika periods',
+        help='Izvēlies laika periodu, par kuru atlasīt datus',
+        value=(),
+        min_value=min_date,
+        max_value=max_date,
+    )
+    if 'selected_dates' not in st.session_state:
+        st.session_state.selected_dates = selected_dates
+    else:
+        st.session_state.selected_dates = selected_dates
 
-st.write(available_months.url(2025, 6))
+    route_selection = st.container()
+    routes_cb = True
+    all_routes = st.checkbox(
+        label='Izvēlēties visus maršrutus',
+        value=False,
+    )
+    if all_routes:
+        selected_routes = route_selection.multiselect(
+            label='Maršruts',
+            help='Izvēlies par kādiem maršrutiem apskatīt datus',
+            default=['Tm 1', 'Tm 7'],
+            options=['Tm 1', 'Tm 7'],
+        )
+    else:
+        selected_routes = route_selection.multiselect(
+            label='Maršruts',
+            help='Izvēlies par kādiem maršrutiem apskatīt datus',
+            options=['Tm 1', 'Tm 7'],
+        )
+
+st.write(selected_dates)
+st.write(selected_routes)
+st.session_state
