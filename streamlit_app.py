@@ -41,7 +41,6 @@ with st.sidebar:
         label='Maršruts',
         help='Izvēlies par kādiem maršrutiem apskatīt datus',
         key='selected_routes',
-        default=st.session_state.get('selected_routes', []),
         options=available_routes,
         on_change=on_routes_change,
         args=(available_routes,),
