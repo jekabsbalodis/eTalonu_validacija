@@ -6,10 +6,10 @@ Loads CSV data from data.gov.lv into DuckDB and displays charts.
 
 import streamlit as st
 
-from database import duckdb_conn
+from callbacks import on_checkbox_change, on_routes_change
 from month_data import available_months
 
-con = duckdb_conn()
+available_routes = ['Tm 1', 'Tm 7']
 
 min_date, max_date = available_months.date_bounds() or (None, None)
 
@@ -21,31 +21,29 @@ with st.sidebar:
     selected_dates = st.date_input(
         label='Laika periods',
         help='Izvēlies laika periodu, par kuru atlasīt datus',
+        key='selected_dates',
         value=(),
         min_value=min_date,
         max_value=max_date,
     )
 
     route_selection = st.container()
-    routes_cb = True
     all_routes = st.checkbox(
         label='Izvēlēties visus maršrutus',
         value=False,
+        key='routes_cb',
+        on_change=on_checkbox_change,
+        args=(available_routes,),
     )
-    if all_routes:
-        selected_routes = route_selection.multiselect(
-            label='Maršruts',
-            help='Izvēlies par kādiem maršrutiem apskatīt datus',
-            default=['Tm 1', 'Tm 7'],
-            options=['Tm 1', 'Tm 7'],
-        )
-    else:
-        selected_routes = route_selection.multiselect(
-            label='Maršruts',
-            help='Izvēlies par kādiem maršrutiem apskatīt datus',
-            options=['Tm 1', 'Tm 7'],
-        )
 
-st.write(selected_dates)
-st.write(selected_routes)
+    selected_routes = route_selection.multiselect(
+        label='Maršruts',
+        help='Izvēlies par kādiem maršrutiem apskatīt datus',
+        key='selected_routes',
+        default=st.session_state.get('selected_routes', []),
+        options=available_routes,
+        on_change=on_routes_change,
+        args=(available_routes,),
+    )
+
 st.session_state
