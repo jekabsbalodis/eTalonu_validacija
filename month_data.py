@@ -2,7 +2,10 @@
 Information about available months and their data URLs.
 """
 
+import calendar
+import datetime
 from dataclasses import dataclass
+from typing import Final
 
 MonthMap = dict[tuple[int, int], str]
 
@@ -14,7 +17,7 @@ class MonthData:
     """
 
     data: MonthMap
-    RESOURCE_PART: str = (
+    RESOURCE_PART: Final[str] = (
         'https://data.gov.lv/dati/dataset/638852d1-f4db-4484-9bca-0b80b84f2001/resource'
     )
 
@@ -47,8 +50,22 @@ class MonthData:
             return None
         return max(self.data.keys())
 
+    def date_bounds(self) -> tuple[datetime.date, datetime.date] | None:
+        if not self.data:
+            return None
 
-AVAILABLE_MONTHS: MonthMap = {
+        min_m: tuple[int, int] = self.min_month()
+        max_m: tuple[int, int] = self.max_month()
+
+        min_date = datetime.date(min_m[0], min_m[1], 1)
+
+        last_day: int = calendar.monthrange(max_m[0], max_m[1])[1]
+        max_date = datetime.date(max_m[0], max_m[1], last_day)
+
+        return min_date, max_date
+
+
+AVAILABLE_MONTHS: Final[MonthMap] = {
     (2025, 8): (
         f'{MonthData.RESOURCE_PART}/330b4dac-ba2a-4553-8d14-9a0d9fb9b0f4/'
         'download/validacijudati08_2025.zip'
