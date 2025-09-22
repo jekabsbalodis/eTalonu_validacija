@@ -16,7 +16,10 @@ def on_routes_change(available_routes: list[str]):
         available_routes: List of available route options.
     """
 
-    if len(st.session_state.selected_routes) < len(available_routes):
+    if len(st.session_state.selected_routes) == len(available_routes):
+        st.session_state.routes_cb = True
+
+    elif len(st.session_state.selected_routes) < len(available_routes):
         st.session_state.routes_cb = False
 
 
@@ -29,6 +32,10 @@ def on_checkbox_change(available_routes: list[str]):
     """
     if st.session_state.routes_cb:
         st.session_state.selected_routes = available_routes
+    else:
+        st.session_state.selected_routes = []
+
+
 def on_date_change():
     """
     Callback to handle date input changes.

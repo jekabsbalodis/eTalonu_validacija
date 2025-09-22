@@ -29,12 +29,20 @@ with st.sidebar:
         on_change=on_date_change,
     )
 
-    selected_routes = route_selection.multiselect(
+    selected_routes = st.multiselect(
         label='Maršruts',
         help='Izvēlies par kādiem maršrutiem apskatīt datus',
         key='selected_routes',
         options=available_routes,
         on_change=on_routes_change,
+        args=(available_routes,),
+    )
+
+    all_routes = st.checkbox(
+        label='Izvēlēties visus maršrutus',
+        value=False,
+        key='routes_cb',
+        on_change=on_checkbox_change,
         args=(available_routes,),
     )
 
