@@ -6,7 +6,7 @@ Loads CSV data from data.gov.lv into DuckDB and displays charts.
 
 import streamlit as st
 
-from callbacks import on_checkbox_change, on_routes_change
+from callbacks import on_checkbox_change, on_routes_change, on_date_change
 from database import database
 from month_data import available_months
 
@@ -26,15 +26,7 @@ with st.sidebar:
         value=(),
         min_value=min_date,
         max_value=max_date,
-    )
-
-    route_selection = st.container()
-    all_routes = st.checkbox(
-        label='Izvēlēties visus maršrutus',
-        value=False,
-        key='routes_cb',
-        on_change=on_checkbox_change,
-        args=(available_routes,),
+        on_change=on_date_change,
     )
 
     selected_routes = route_selection.multiselect(
@@ -46,4 +38,9 @@ with st.sidebar:
         args=(available_routes,),
     )
 
+st.write('**download test**')
+st.write(database.conn.execute('''--sql
+    select * from '''))
+
+st.write('**Session state:**')
 st.session_state
