@@ -23,13 +23,14 @@ max_date: datetime.date = st.session_state.date_bounds[1]
 #     st.session_state.df = load_and_parse_data([(max_date.year, max_date.month)])
 # df: pl.LazyFrame = st.session_state.df
 
-available_routes = (
-    df.select(pl.col('TMarsruts'))
-    .unique()
-    .sort('TMarsruts')
-    .collect()['TMarsruts']
-    .to_list()
-)
+# available_routes = (
+#     df.select(pl.col('TMarsruts'))
+#     .unique()
+#     .sort('TMarsruts')
+#     .collect()['TMarsruts']
+#     .to_list()
+# )
+available_routes = []
 
 st.title('🚋 eTalonu validācijas')
 
@@ -61,13 +62,13 @@ with st.sidebar:
         on_change=on_checkbox_change,
         args=(available_routes,),
     )
-st.metric(
-    label='Veikto validāciju skaits',
-    value=numerize(df.select(pl.len()).collect().item(), 2),
-    border=True,
-)
+# st.metric(
+#     label='Veikto validāciju skaits',
+#     value=numerize(df.select(pl.len()).collect().item(), 2),
+#     border=True,
+# )
 st.write('**download test**')
-st.write(df.count())
+# st.write(df.count())
 st.write(available_routes)
 
 st.write('**Session state:**')
