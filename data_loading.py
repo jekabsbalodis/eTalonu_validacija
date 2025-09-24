@@ -4,7 +4,8 @@ based on url from month_data.py.
 """
 
 import datetime
-import io
+import pathlib
+import tempfile
 import zipfile
 
 import polars as pl
@@ -50,7 +51,6 @@ def load_and_parse_data(
         by passing start_date and end_date values
     """
 
-    files_dict: dict[str, io.StringIO] = {}
     urls: list[str] = []
     lazy_frames: list[pl.LazyFrame] = []
 
@@ -60,21 +60,28 @@ def load_and_parse_data(
             urls.append(url)
 
     for url in urls:
-        response = requests.get(url, timeout=30)
-        response.raise_for_status()
+        with tempfile.NamedTemporaryFile(
+            delete_on_close=False, suffix='.zip'
+        ) as temp_file:
+            with requests.get(url, timeout=30, stream=True) as response:
+                response.raise_for_status()
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        temp_file.write(chunk)
 
-        with zipfile.ZipFile(io.BytesIO(response.content), mode='r') as archive:
-            for file in archive.namelist():
-                if file.endswith('/'):
-                    continue
-                raw_bytes = archive.read(file)
-                text_str = raw_bytes.decode(encoding='utf-8')
-                files_dict[file] = io.StringIO(text_str)
+            temp_file.close()
 
-    for csv_io in files_dict.values():
-        df = pl.read_csv(csv_io)
-        lazy_frames.append(df.lazy())
+            with tempfile.TemporaryDirectory() as temp_dir:
+                extract_dir = pathlib.Path(temp_dir)
+                with zipfile.ZipFile(temp_file.name, mode='r') as archive:
+                    archive.extractall(extract_dir)
+                for file_path in extract_dir.rglob('*'):
+                    if file_path.is_file():
+                        lazy_frame = pl.read_csv(file_path).lazy()
+                        lazy_frames.append(lazy_frame)
 
-    lazy_frame: pl.LazyFrame = pl.concat(lazy_frames)
+            pathlib.Path(temp_file.name).unlink()
+
+    lazy_frame = pl.concat(lazy_frames, how='vertical')
 
     return lazy_frame
