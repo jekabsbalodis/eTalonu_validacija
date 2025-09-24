@@ -1,18 +1,35 @@
 """
 Streamlit app for eTalonu validation data visualization.
 
-Loads CSV data from data.gov.lv into DuckDB and displays charts.
+Loads CSV data from data.gov.lv into Polars and displays charts.
 """
 
-import streamlit as st
+import datetime
 
-from callbacks import on_checkbox_change, on_routes_change, on_date_change
-from database import database
+import polars as pl
+import streamlit as st
+from numerize.numerize import numerize
+
+from callbacks import on_checkbox_change, on_date_change, on_routes_change
+from data_loading import load_and_parse_data
 from month_data import available_months
 
-available_routes = ['Tm 1', 'Tm 7']
+if 'date_bounds' not in st.session_state:
+    st.session_state.date_bounds = available_months.date_bounds()
+min_date: datetime.date = st.session_state.date_bounds[0]
+max_date: datetime.date = st.session_state.date_bounds[1]
 
-min_date, max_date = available_months.date_bounds() or (None, None)
+if 'df' not in st.session_state:
+    st.session_state.df = load_and_parse_data([(max_date.year, max_date.month)])
+df: pl.LazyFrame = st.session_state.df
+
+available_routes = (
+    df.select(pl.col('TMarsruts'))
+    .unique()
+    .sort('TMarsruts')
+    .collect()['TMarsruts']
+    .to_list()
+)
 
 st.title('🚋 eTalonu validācijas')
 
@@ -40,15 +57,18 @@ with st.sidebar:
 
     all_routes = st.checkbox(
         label='Izvēlēties visus maršrutus',
-        value=False,
         key='routes_cb',
         on_change=on_checkbox_change,
         args=(available_routes,),
     )
-
+st.metric(
+    label='Veikto validāciju skaits',
+    value=numerize(df.select(pl.len()).collect().item(), 2),
+    border=True,
+)
 st.write('**download test**')
-st.write(database.conn.execute('''--sql
-    select * from '''))
+st.write(df.count())
+st.write(available_routes)
 
 st.write('**Session state:**')
 st.session_state
