@@ -19,9 +19,9 @@ if 'date_bounds' not in st.session_state:
 min_date: datetime.date = st.session_state.date_bounds[0]
 max_date: datetime.date = st.session_state.date_bounds[1]
 
-if 'df' not in st.session_state:
-    st.session_state.df = load_and_parse_data([(max_date.year, max_date.month)])
-df: pl.LazyFrame = st.session_state.df
+# if 'df' not in st.session_state:
+#     st.session_state.df = load_and_parse_data([(max_date.year, max_date.month)])
+# df: pl.LazyFrame = st.session_state.df
 
 available_routes = (
     df.select(pl.col('TMarsruts'))
