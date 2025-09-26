@@ -53,7 +53,6 @@ with st.sidebar:
             label='Laika periods',
             help='Izvēlies laika periodu, par kuru atlasīt datus',
             key='selected_dates',
-            value=(),
             min_value=min_date,
             max_value=max_date,
         )
