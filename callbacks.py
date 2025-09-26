@@ -20,13 +20,15 @@ def _get_available_options(
     """
 
     rel = db.get_relation("""--sql
-                          select TMarsruts, TranspVeids, Laiks as laiks
+                          select TMarsruts, TranspVeids, Laiks as l
                           from validacijas;
                           """)
 
     if date_range and len(date_range) == 2:
         start_date, end_date = date_range
-        rel = rel.filter(f"laiks >= '{start_date}' and laiks < '{end_date}'::DATE + 1")
+        rel = rel.filter(f"l >= '{start_date}' and l < '{end_date}'::DATE + 1")
+
+    print(rel.sql_query())
 
     if tr_types:
         rel = rel.filter(f'TranspVeids IN {tuple(tr_types)}')
@@ -67,6 +69,40 @@ def update_available_options():
         and st.session_state.tr_types == st.session_state.available_tr_types
     ):
         st.session_state.selected_tr_types = st.session_state.available_tr_types
+
+
+def form_submit():
+    update_available_options()
+
+    # rel = db.get_relation("""--sql
+    #                                 select
+    #                                     *
+    #                                 from
+    #                                     validacijas;
+    #                                 """).filter("Laiks >= '2025-08-01' and Laiks < '2025-08-31'::DATE + 1")
+
+    # bar_chart_rel = rel.select('hour(laiks) as hour, Ier_id').count('Ier_id', 'hour').select('Ier_id')
+    # # bar_chart_rel = bar_chart_rel
+    current_dates = st.session_state.get('selected_dates')
+    bar_chart_rel = db.conn.sql(
+        query="""--sql
+                select
+                    TMarsruts as route,
+                    hour(Laiks) as hour,
+                    count(*)
+                from
+                    validacijas
+                where
+                    Laiks >= ? and Laiks < ?::DATE + 1 and route like 'Tm%'
+                group by
+                    hour, route
+                order by
+                    hour, route;
+              """,
+        params=(current_dates[0], current_dates[1]),
+    )
+    print(bar_chart_rel.sql_query())
+    st.session_state.bar_chart = bar_chart_rel.pl()
 
 
 def route_select():
