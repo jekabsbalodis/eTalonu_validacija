@@ -62,7 +62,6 @@ with st.sidebar:
             help='Izvēlies par kādiem transporta veidiem apskatīt datus',
             key='selected_tr_types',
             options=st.session_state.tr_types,
-            default=st.session_state.available_tr_types,
             selection_mode='multi',
             label_visibility='collapsed',
             width='stretch',
