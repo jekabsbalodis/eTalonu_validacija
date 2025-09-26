@@ -32,7 +32,8 @@ class DatabaseConnection:
         """
 
         return duckdb.connect(
-            f'md:validacijas?motherduck_token={st.secrets.duckdb.md_token}'
+            f'md:validacijas?motherduck_token={st.secrets.duckdb.md_token}',
+            read_only=True,
         )
 
     def get_relation(
