@@ -1,54 +1,115 @@
 """
 Streamlit app for eTalonu validation data visualization.
 
-Loads CSV data from data.gov.lv into DuckDB and displays charts.
+Loads CSV data from data.gov.lv and displays charts.
 """
+
+import datetime
 
 import streamlit as st
 
-from callbacks import on_checkbox_change, on_routes_change, on_date_change
-from database import database
-from month_data import available_months
+from callbacks import route_select, update_available_options
+from database import db
 
-available_routes = ['Tm 1', 'Tm 7']
+if 'date_bounds' not in st.session_state:
+    date_bounds_rel = db.get_relation("""--sql
+        select
+            date(min(laiks)) as min_date,
+            date(max(Laiks)) as max_date
+        from
+            validacijas;
+        """)
+    st.session_state.date_bounds = date_bounds_rel.fetchone()
+min_date, max_date = st.session_state.date_bounds
 
-min_date, max_date = available_months.date_bounds() or (None, None)
+if 'tr_types' not in st.session_state:
+    tr_types_rel = db.get_relation("""--sql
+                                   select distinct TranspVeids
+                                   from validacijas
+                                   order by TranspVeids;
+                                   """)
+    st.session_state.tr_types = tr_types_rel.pl().to_series().to_list()
+
+if 'selected_dates' not in st.session_state:
+    st.session_state.selected_dates = (
+        datetime.date(max_date.year, max_date.month, 1),
+        max_date,
+    )
+
+if (
+    'available_tr_types' not in st.session_state
+    or 'available_routes' not in st.session_state
+):
+    update_available_options()
+
 
 st.title('🚋 eTalonu validācijas')
 
 with st.sidebar:
-    st.header('Vizualizāciju filtri')
+    with st.form('filters', border=False, enter_to_submit=False):
+        st.header('Vizualizāciju filtri')
 
-    selected_dates = st.date_input(
-        label='Laika periods',
-        help='Izvēlies laika periodu, par kuru atlasīt datus',
-        key='selected_dates',
-        value=(),
-        min_value=min_date,
-        max_value=max_date,
-        on_change=on_date_change,
-    )
+        selected_dates = st.date_input(
+            label='Laika periods',
+            help='Izvēlies laika periodu, par kuru atlasīt datus',
+            key='selected_dates',
+            value=(),
+            min_value=min_date,
+            max_value=max_date,
+        )
 
-    selected_routes = st.multiselect(
-        label='Maršruts',
-        help='Izvēlies par kādiem maršrutiem apskatīt datus',
-        key='selected_routes',
-        options=available_routes,
-        on_change=on_routes_change,
-        args=(available_routes,),
-    )
+        selected_tr_types = st.segmented_control(
+            label='Transporta veids',
+            help='Izvēlies par kādiem transporta veidiem apskatīt datus',
+            key='selected_tr_types',
+            options=st.session_state.tr_types,
+            default=st.session_state.available_tr_types,
+            selection_mode='multi',
+            label_visibility='collapsed',
+            width='stretch',
+        )
 
-    all_routes = st.checkbox(
-        label='Izvēlēties visus maršrutus',
-        value=False,
-        key='routes_cb',
-        on_change=on_checkbox_change,
-        args=(available_routes,),
-    )
+        if st.form_submit_button(
+            label='Atlasīt datus',
+            type='primary',
+            width='stretch',
+            on_click=update_available_options,
+        ):
+            st.session_state.init_download = True
 
-st.write('**download test**')
-st.write(database.conn.execute('''--sql
-    select * from '''))
+    if st.session_state.get('init_download', None):
+        st.divider()
+        st.subheader('Maršrutu filtri')
+        check = st.toggle(
+            label='Atlasīt visus',
+            key='route_toggle',
+            value=True,
+        )
+        with st.form('route filters', border=False, enter_to_submit=False):
+            for tr_type in st.session_state.available_tr_types:
+                match tr_type:
+                    case 'Autobuss':
+                        abbr = 'A'
+                    case 'Tramvajs':
+                        abbr = 'Tm'
+                    case 'Trolejbuss':
+                        abbr = 'Tr'
+                st.multiselect(
+                    label=tr_type,
+                    disabled=check,
+                    options=filter(
+                        lambda w: w.startswith(abbr), st.session_state.available_routes
+                    ),
+                )
+            st.write('vēl būs')
+            st.form_submit_button(
+                label='Pielāgot maršrutus',
+                type='secondary',
+                width='stretch',
+            )
 
-st.write('**Session state:**')
-st.session_state
+
+st.bar_chart()
+
+with st.expander('**Session state:**'):
+    st.session_state

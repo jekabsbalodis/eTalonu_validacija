@@ -2,56 +2,72 @@
 Callback functions to pass to streamlit widgets.
 """
 
+from datetime import date
+
+from polars import DataFrame
 import streamlit as st
-from data_loading import get_months, load_data
-from month_data import available_months
-from database import database
+
+from database import db
 
 
-def on_routes_change(available_routes: list[str]):
+def _get_available_options(
+    date_range: tuple[date, date] | None = None,
+    tr_types: list[str] | None = None,
+    routes: list[str] | None = None,
+) -> tuple[DataFrame, DataFrame]:
     """
-    Callback to uncheck 'select all' when routes are manually deselected.
-
-    Args:
-        available_routes: List of available route options.
+    Get available transport types and routes based on current filters.
     """
 
-    if len(st.session_state.selected_routes) == len(available_routes):
-        st.session_state.routes_cb = True
+    rel = db.get_relation("""--sql
+                          select TMarsruts, TranspVeids, Laiks as laiks
+                          from validacijas;
+                          """)
 
-    elif len(st.session_state.selected_routes) < len(available_routes):
-        st.session_state.routes_cb = False
+    if date_range and len(date_range) == 2:
+        start_date, end_date = date_range
+        rel = rel.filter(f"laiks >= '{start_date}' and laiks < '{end_date}'::DATE + 1")
+
+    if tr_types:
+        rel = rel.filter(f'TranspVeids IN {tuple(tr_types)}')
+
+    if routes:
+        rel = rel.filter(f'TMarsruts IN {tuple(routes)}')
+
+    available_transport_types = (
+        rel.select('TranspVeids').unique('TranspVeids').sort('TranspVeids').pl()
+    )
+
+    available_routes = (
+        rel.select('TMarsruts').unique('TMarsruts').sort('TMarsruts').pl()
+    )
+
+    return available_transport_types, available_routes
 
 
-def on_checkbox_change(available_routes: list[str]):
+def update_available_options():
     """
-    Callback to select all routes when checkbox is checked.
-
-    Args:
-        available_routes: List of available route options.
+    Update available options based on current selections.
     """
-    if st.session_state.routes_cb:
-        st.session_state.selected_routes = available_routes
-    else:
-        st.session_state.selected_routes = []
+    current_dates = st.session_state.get('selected_dates')
+    current_tr_types = st.session_state.get('selected_tr_types')
+    current_routes = st.session_state.get('selected_routes')
+
+    available_tr_types, available_routes = _get_available_options(
+        date_range=current_dates,
+        tr_types=current_tr_types,
+        routes=current_routes,
+    )
+
+    st.session_state.available_tr_types = available_tr_types.to_series().to_list()
+    st.session_state.available_routes = available_routes.to_series().to_list()
+
+    if (
+        len(st.session_state.get('selected_tr_types', [])) == 0
+        and st.session_state.tr_types == st.session_state.available_tr_types
+    ):
+        st.session_state.selected_tr_types = st.session_state.available_tr_types
 
 
-def on_date_change():
-    """
-    Callback to handle date input changes.
-    """
-    if not st.session_state.selected_dates:
-        return
-
-    if len(st.session_state.selected_dates) == 2:
-        start_date, end_date = st.session_state.selected_dates
-        months = get_months(start_date, end_date)
-        if len(months) == 1:
-            print(months[0])
-            url = available_months.url(months[0][0], months[0][1])
-            print(url)
-            for key, value in load_data(url).items():
-                print(key)
-                database.conn.execute('''--sql
-                select * from read_csv_auto(?)
-                ''', (key,))
+def route_select():
+    st.session_state.init_download = True

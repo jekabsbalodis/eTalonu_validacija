@@ -1,5 +1,5 @@
 """
-DuckDB in-memory database connection.
+DuckDB MotherDuck database connection.
 """
 
 import duckdb
@@ -25,12 +25,33 @@ class DatabaseConnection:
         return self._conn
 
     @staticmethod
-    @st.cache_resource
+    @st.cache_resource(show_spinner='Veido savienojumu ar datubāzi...', show_time=True)
     def _create_connection() -> duckdb.DuckDBPyConnection:
         """
-        Create cached DuckDB in-memory connection.
+        Create cached DuckDB MotherDuck connection.
         """
-        return duckdb.connect()
+
+        return duckdb.connect(
+            f'md:validacijas?motherduck_token={st.secrets.duckdb.md_token}'
+        )
+
+    def get_relation(
+        self,
+        sql_query: str,
+    ) -> duckdb.DuckDBPyRelation:
+        """
+        Execute query and return DuckDBPyrelation.
+
+        Args:
+            sql_query: SQL query string
+
+        Returns:
+            A DuckDBPyRelation that can be further modified before returning
+            a result
+        """
+        result = self.conn.sql(query=sql_query)
+
+        return result
 
 
-database = DatabaseConnection()
+db = DatabaseConnection()
