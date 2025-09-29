@@ -180,3 +180,4 @@ node_modules/
 # CSS and js files
 app/static/css/main-dev.*
 app/static/js/bundle-dev.*
+.aider*
