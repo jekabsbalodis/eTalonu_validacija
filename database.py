@@ -11,7 +11,10 @@ class DatabaseConnection:
     DuckDB connection wrapper with caching and some utility methods.
     """
 
-    def __init__(self):
+    def __init__(self: 'DatabaseConnection'):
+        """
+        Initialize the DatabaseConnection instance.
+        """
         self._conn: duckdb.DuckDBPyConnection | None = None
 
     @property
