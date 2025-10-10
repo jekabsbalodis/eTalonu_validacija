@@ -4,76 +4,41 @@ Callback functions to pass to streamlit widgets.
 
 from datetime import date
 
-from polars import DataFrame
 import streamlit as st
+from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
+from data_manager import get_total_rides, get_total_rides_up_to_month
 from database import db
+from state_manager import MetricsKeys, StateKeys, update_available_tr_types
+from utils import last_day_of_month
 
 
-def _get_available_options(
-    date_range: tuple[date, date] | None = None,
-    tr_types: list[str] | None = None,
-    routes: list[str] | None = None,
-) -> tuple[DataFrame, DataFrame]:
+def form_submit(session_state: SessionStateProxy) -> None:
     """
-    Get available transport types and routes based on current filters.
+    Update the session_state values according to selected dates and transport types.
     """
+    min_date: date = session_state[StateKeys.SELECTED_MONTH]
+    max_date: date = last_day_of_month(min_date)
+    date_range = (min_date, max_date)
 
-    rel = db.get_relation("""--sql
-                          select TMarsruts, TranspVeids, Laiks as l
-                          from validacijas;
-                          """)
+    selected_tr_types = session_state[StateKeys.SELECTED_TR_TYPES]
+    if len(selected_tr_types) == 0:
+        st.error(
+            body='Lūdzu izvēlies vismaz vienu transporta veidu',
+            icon=':material/error:',
+        )
+        return
 
-    if date_range and len(date_range) == 2:
-        start_date, end_date = date_range
-        rel = rel.filter(f"l >= '{start_date}' and l < '{end_date}'::DATE + 1")
-
-    print(rel.sql_query())
-
-    if tr_types:
-        rel = rel.filter(f'TranspVeids IN {tuple(tr_types)}')
-
-    if routes:
-        rel = rel.filter(f'TMarsruts IN {tuple(routes)}')
-
-    available_transport_types = (
-        rel.select('TranspVeids').unique('TranspVeids').sort('TranspVeids').pl()
+    update_available_tr_types(
+        db,
+        session_state,
+        date_range=date_range,
     )
-
-    available_routes = (
-        rel.select('TMarsruts').unique('TMarsruts').sort('TMarsruts').pl()
+    session_state[StateKeys.METRICS][MetricsKeys.TOTAL_RIDES] = get_total_rides(
+        db,
+        date_range,
+        selected_tr_types,
     )
-
-    return available_transport_types, available_routes
-
-
-def update_available_options():
-    """
-    Update available options based on current selections.
-    """
-    current_dates = st.session_state.get('selected_dates')
-    current_tr_types = st.session_state.get('selected_tr_types')
-    current_routes = st.session_state.get('selected_routes')
-
-    available_tr_types, available_routes = _get_available_options(
-        date_range=current_dates,
-        tr_types=current_tr_types,
-        routes=current_routes,
+    session_state[StateKeys.METRICS][MetricsKeys.TOTAL_RIDES_UP_TO_MONTH] = (
+        get_total_rides_up_to_month(db, min_date, selected_tr_types)
     )
-
-    st.session_state.available_tr_types = available_tr_types.to_series().to_list()
-    st.session_state.available_routes = available_routes.to_series().to_list()
-
-    if (
-        len(st.session_state.get('selected_tr_types', [])) == 0
-        and st.session_state.tr_types == st.session_state.available_tr_types
-    ):
-        st.session_state.selected_tr_types = st.session_state.available_tr_types
-
-
-def form_submit():
-    update_available_options()
-
-
-def route_select():
-    st.session_state.init_download = True
