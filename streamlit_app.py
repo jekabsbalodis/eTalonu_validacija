@@ -14,7 +14,7 @@ from state_manager import MetricsKeys, StateKeys, init_state
 from utils import format_number
 
 # locale.setlocale(locale.LC_TIME, 'lv_LV.utf8')
-st.write(locale.getlocale(category=locale.LC_TIME))
+st.write(locale.getlocale()
 init_state(db, st.session_state)
 
 
