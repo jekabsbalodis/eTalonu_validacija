@@ -9,7 +9,7 @@ import streamlit as st
 from callbacks import form_submit
 from database import db
 from state_manager import MetricsKeys, StateKeys, init_state
-from utils import format_number, format_date
+from utils import format_number, format_month_repr
 
 init_state(db, st.session_state)
 
@@ -24,7 +24,7 @@ with st.sidebar:
             help='Izvēlies mēnesi, par kuru atlasīt datus',
             key=StateKeys.SELECTED_MONTH,
             options=st.session_state[StateKeys.AVAILABLE_MONTHS],
-            format_func=format_date,
+            format_func=format_month_repr,
         )
 
         selected_tr_types = st.segmented_control(
