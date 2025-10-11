@@ -4,16 +4,12 @@ Streamlit app for eTalonu validation data visualization.
 Loads CSV data from data.gov.lv and displays charts.
 """
 
-import locale
-
 import streamlit as st
 
 from callbacks import form_submit
 from database import db
 from state_manager import MetricsKeys, StateKeys, init_state
-from utils import format_number
-
-locale.setlocale(locale.LC_TIME, 'lv_LV.utf8')
+from utils import format_number, format_date
 
 init_state(db, st.session_state)
 
@@ -28,7 +24,7 @@ with st.sidebar:
             help='Izvēlies mēnesi, par kuru atlasīt datus',
             key=StateKeys.SELECTED_MONTH,
             options=st.session_state[StateKeys.AVAILABLE_MONTHS],
-            format_func=lambda x: x.strftime('%B %Y'),
+            format_func=format_date,
         )
 
         selected_tr_types = st.segmented_control(
