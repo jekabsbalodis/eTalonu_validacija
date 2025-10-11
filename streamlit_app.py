@@ -13,7 +13,7 @@ from database import db
 from state_manager import MetricsKeys, StateKeys, init_state
 from utils import format_number
 
-# locale.setlocale(locale.LC_ALL, 'lv_LV.utf8')
+locale.setlocale(locale.LC_TIME, 'lv_LV.utf8')
 
 init_state(db, st.session_state)
 
