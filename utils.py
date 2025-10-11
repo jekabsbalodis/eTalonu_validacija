@@ -27,7 +27,7 @@ def last_day_of_month(start_day: date) -> date:
         start_day.year, start_day.month, monthrange(start_day.year, start_day.month)[1]
     )
 
-def format_date(date: date) -> str:
+def format_month_repr(date: date) -> str:
     """
     Format date to show month and year with Latvian locale
     """
