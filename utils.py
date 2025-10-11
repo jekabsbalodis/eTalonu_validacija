@@ -7,7 +7,7 @@ from datetime import date
 
 from babel import Locale
 from babel.numbers import format_compact_decimal
-from babel.dates import formar_date
+from babel.dates import format_date
 
 _locale = Locale('lv')
 
