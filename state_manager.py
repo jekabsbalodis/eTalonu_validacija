@@ -56,27 +56,25 @@ def init_state(db: DatabaseConnection, session_state: SessionStateProxy) -> None
     min_date: date = date(default_month.year, default_month.month, 1)
     max_date: date = last_day_of_month(min_date)
     if StateKeys.AVAILABLE_TR_TYPES not in session_state:
-        available_tr_types = get_available_tr_types(db, date_range=(min_date, max_date))
-        session_state[StateKeys.AVAILABLE_TR_TYPES] = (
-            available_tr_types.to_series().to_list()
+        update_available_tr_types(
+            db=db,
+            session_state=session_state,
+            date_range=(min_date, max_date),
         )
-        session_state[StateKeys.SELECTED_TR_TYPES] = (
-            available_tr_types.to_series().to_list()
-        )
-
+        session_state[StateKeys.SELECTED_TR_TYPES] = session_state[
+            StateKeys.AVAILABLE_TR_TYPES
+        ]
     # Metrics for initial app load
     if StateKeys.METRICS not in session_state:
         session_state[StateKeys.METRICS] = {}
 
-        session_state[StateKeys.METRICS][MetricsKeys.TOTAL_RIDES] = get_total_rides(
-            _db=db,
+        tr_types: list[str] = session_state[StateKeys.AVAILABLE_TR_TYPES]
+
+        update_metrics(
+            db=db,
+            session_state=session_state,
             date_range=(min_date, max_date),
-        )
-        session_state[StateKeys.METRICS][MetricsKeys.TOTAL_RIDES_UP_TO_MONTH] = (
-            get_total_rides_up_to_month(
-                _db=db,
-                up_to_date=min_date,
-            )
+            tr_types=tr_types,
         )
 
 
@@ -94,6 +92,35 @@ def update_available_tr_types(
         date_range=date_range,
     )
 
-    session_state[StateKeys.AVAILABLE_TR_TYPES] = (
-        available_tr_types.to_series().to_list()
+    session_state[StateKeys.AVAILABLE_TR_TYPES] = available_tr_types.get_column(
+        'TranspVeids'
+    ).to_list()
+
+
+def update_metrics(
+    db: DatabaseConnection,
+    session_state: SessionStateProxy,
+    date_range: tuple[date, date],
+    tr_types: list[str],
+) -> None:
+    """
+    Update all metrics in session state based on current selections.
+    """
+    min_date, max_date = date_range
+
+    session_state[StateKeys.METRICS][MetricsKeys.TOTAL_RIDES] = get_total_rides(
+        _db=db,
+        up_to_date=max_date,
+        tr_types=tr_types,
+    )
+
+    session_state[StateKeys.METRICS][MetricsKeys.PEAK_HOUR] = get_peak_hour(
+        _db=db,
+        date_range=date_range,
+        tr_types=tr_types,
+    )
+    session_state[StateKeys.METRICS][MetricsKeys.POPULAR_ROUTES] = get_popular_routes(
+        _db=db,
+        date_range=date_range,
+        tr_types=tr_types,
     )

@@ -7,9 +7,12 @@ from datetime import date
 import streamlit as st
 from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 
-from data_manager import get_total_rides, get_total_rides_up_to_month
 from database import db
-from state_manager import MetricsKeys, StateKeys, update_available_tr_types
+from state_manager import (
+    StateKeys,
+    update_available_tr_types,
+    update_metrics,
+)
 from utils import last_day_of_month
 
 
@@ -30,15 +33,14 @@ def form_submit(session_state: SessionStateProxy) -> None:
         return
 
     update_available_tr_types(
-        db,
-        session_state,
+        db=db,
+        session_state=session_state,
         date_range=date_range,
     )
-    session_state[StateKeys.METRICS][MetricsKeys.TOTAL_RIDES] = get_total_rides(
-        db,
-        date_range,
-        selected_tr_types,
-    )
-    session_state[StateKeys.METRICS][MetricsKeys.TOTAL_RIDES_UP_TO_MONTH] = (
-        get_total_rides_up_to_month(db, min_date, selected_tr_types)
+
+    update_metrics(
+        db=db,
+        session_state=session_state,
+        date_range=date_range,
+        tr_types=selected_tr_types,
     )
