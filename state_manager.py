@@ -10,8 +10,9 @@ from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 from data_manager import (
     get_available_months,
     get_available_tr_types,
+    get_peak_hour,
+    get_popular_routes,
     get_total_rides,
-    get_total_rides_up_to_month,
 )
 from database import DatabaseConnection
 from utils import last_day_of_month
@@ -35,7 +36,8 @@ class MetricsKeys(str, Enum):
     """
 
     TOTAL_RIDES = 'total_rides'
-    TOTAL_RIDES_UP_TO_MONTH = 'total_rides_up_to_month'
+    PEAK_HOUR = 'peak_hour'
+    POPULAR_ROUTES = 'popular_routes'
 
 
 def init_state(db: DatabaseConnection, session_state: SessionStateProxy) -> None:

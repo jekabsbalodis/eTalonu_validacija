@@ -45,21 +45,55 @@ SQL_AVAILABLE_TR_TYPES: Final[str] = """--sql
 
 SQL_TOTAL_RIDES: Final[str] = """--sql
     select
-        count(*)
-    from
-        validacijas
-    {where_clause};
-    """
-
-SQL_TOTAL_RIDES_UP_TO_MONTH: Final[str] = """--sql
-    select
-        count(*),
+        count(*) as total_rides,
+        round(count(*) / count(distinct date(Laiks)), 0) as avg_rides_per_day,
         date_trunc('month', Laiks) as moy
     from
         validacijas
     {where_clause}
     group by moy
     order by moy;
+    """
+
+SQL_PEAK_HOUR: Final[str] = """--sql
+    with hs as
+    (
+        select range as hour from range(24)
+    ),
+    hd as
+    (
+        select
+            count(*) as ride_count,
+            hour(Laiks) as hour,
+            count(distinct date(Laiks)) as distinct_days
+        from
+            validacijas
+        {where_clause}
+        group by hour
+    )
+    select
+        hs.hour,
+        coalesce(
+            round((hd.ride_count / hd.distinct_days), 0),
+            0
+        ) as avg_rides_per_hour
+    from
+        hs
+    left join
+        hd on hs.hour = hd.hour
+    order by hs.hour;
+    """
+
+SQL_POPULAR_ROUTES: Final[str] = """--sql
+    select
+        count(*) as 'Braucienu skaits',
+        TMarsruts as 'Maršruts',
+    from
+        validacijas
+    {where_clause}
+    group by Tmarsruts
+    order by count(*) desc
+    limit 15;
     """
 
 
@@ -87,7 +121,7 @@ def _get_data_with_filters(
 
     elif up_to_date:
         up_to_date_clause = """--sql
-            Laiks < $up_to_date
+            Laiks < $up_to_date::DATE + 1
             """
         where_clauses.append(up_to_date_clause)
         params['up_to_date'] = up_to_date
@@ -137,7 +171,7 @@ def get_available_months(_db: DatabaseConnection) -> list[date]:
 )
 def get_available_tr_types(
     _db: DatabaseConnection,
-    date_range: tuple[date, date] | None = None,
+    date_range: tuple[date, date],
 ) -> DataFrame:
     """
     Get available transport types based on current filters.
@@ -155,15 +189,35 @@ def get_available_tr_types(
 )
 def get_total_rides(
     _db: DatabaseConnection,
-    date_range: tuple[date, date] | None = None,
+    up_to_date: date,
     tr_types: list[str] | None = None,
 ) -> DataFrame:
     """
-    Get count of total rides for the selected month.
+    Get count of rides for each month up to selected month (excluding).
     """
     return _get_data_with_filters(
         db=_db,
         sql_query=SQL_TOTAL_RIDES,
+        up_to_date=up_to_date,
+        tr_types=tr_types,
+    )
+
+
+@st.cache_data(
+    show_spinner=SpinnerMessages.METRICS.value,
+    show_time=True,
+)
+def get_peak_hour(
+    _db: DatabaseConnection,
+    date_range: tuple[date, date],
+    tr_types: list[str] | None = None,
+) -> DataFrame:
+    """
+    Get the count for number of rides per each hour of day.
+    """
+    return _get_data_with_filters(
+        db=_db,
+        sql_query=SQL_PEAK_HOUR,
         date_range=date_range,
         tr_types=tr_types,
     )
@@ -173,17 +227,17 @@ def get_total_rides(
     show_spinner=SpinnerMessages.METRICS.value,
     show_time=True,
 )
-def get_total_rides_up_to_month(
+def get_popular_routes(
     _db: DatabaseConnection,
-    up_to_date: date | None = None,
+    date_range: tuple[date, date],
     tr_types: list[str] | None = None,
 ) -> DataFrame:
     """
-    Get count of rides for each month up to selected month (excluding).
+    Get the list of routes ordered by count of rides.
     """
     return _get_data_with_filters(
         db=_db,
-        sql_query=SQL_TOTAL_RIDES_UP_TO_MONTH,
-        up_to_date=up_to_date,
+        sql_query=SQL_POPULAR_ROUTES,
+        date_range=date_range,
         tr_types=tr_types,
     )
