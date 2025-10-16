@@ -35,6 +35,14 @@ def format_month_repr(date: date) -> str:
     return format_date(date, format='MMMM YYYY', locale=_locale)
 
 
+def format_month_repr_long(date: date) -> str:
+    """
+    Format date to show month and year wiht Latvian locale. Long version.
+    """
+
+    return format_date(date, format='long', locale=_locale)
+
+
 def format_percent(i: float) -> str:
     """
     Format number to display percentage.
