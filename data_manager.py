@@ -96,6 +96,56 @@ SQL_POPULAR_ROUTES: Final[str] = """--sql
     limit 15;
     """
 
+SQL_TR_DISTRIBUTION: Final[str] = """--sql
+    select
+        count(*) as 'Braucienu skaits',
+        TranspVeids as 'Transporta veids'
+    from
+        validacijas
+    {where_clause}
+    group by TranspVeids
+    order by count(*) desc;
+    """
+
+SQL_PEAK_DAY: Final[str] = """--sql
+    with dow as
+    (
+        select
+            isodow(Laiks) as dow,
+            round(count(*) / count(distinct date(Laiks)), 0) as avg_rides_per_day
+        from
+            validacijas
+        {where_clause}
+        group by isodow(Laiks)
+    )
+    select
+        case dow
+            when 1 then 'Pirmdiena'
+            when 2 then 'Otrdiena'
+            when 3 then 'Trešdiena'
+            when 4 then 'Ceturtdiena'
+            when 5 then 'Piektdiena'
+            when 6 then 'Sestdiena'
+            when 7 then 'Svētdiena'
+        end as 'Nedēļas diena',
+        avg_rides_per_day as 'Braucieni vidēji dienā'
+    from
+        dow
+    order by dow;
+    """
+
+SQL_ROUTE_DENSITY: Final[str] = """--sql
+    select
+        TMarsruts as 'Maršruts',
+        round(count(*) / count(distinct GarNr), 0) as 'Vidējais braucienu skaits'
+    from
+        validacijas
+    {where_clause}
+    group by TMarsruts
+    order by count(*) desc
+    limit 15;
+    """
+
 
 def _get_data_with_filters(
     db: DatabaseConnection,
@@ -238,6 +288,66 @@ def get_popular_routes(
     return _get_data_with_filters(
         db=_db,
         sql_query=SQL_POPULAR_ROUTES,
+        date_range=date_range,
+        tr_types=tr_types,
+    )
+
+
+@st.cache_data(
+    show_spinner=SpinnerMessages.METRICS.value,
+    show_time=True,
+)
+def get_tr_distribution(
+    _db: DatabaseConnection,
+    date_range: tuple[date, date],
+    tr_types: list[str] | None = None,
+) -> DataFrame:
+    """
+    Get the distribution of rides between the transport types.
+    """
+    return _get_data_with_filters(
+        db=_db,
+        sql_query=SQL_TR_DISTRIBUTION,
+        date_range=date_range,
+        tr_types=tr_types,
+    )
+
+
+@st.cache_data(
+    show_spinner=SpinnerMessages.METRICS.value,
+    show_time=True,
+)
+def get_peak_day(
+    _db: DatabaseConnection,
+    date_range: tuple[date, date],
+    tr_types: list[str] | None = None,
+) -> DataFrame:
+    """
+    Get the average count of rides per each day of week in month.
+    """
+    return _get_data_with_filters(
+        db=_db,
+        sql_query=SQL_PEAK_DAY,
+        date_range=date_range,
+        tr_types=tr_types,
+    )
+
+
+@st.cache_data(
+    show_spinner=SpinnerMessages.METRICS.value,
+    show_time=True,
+)
+def get_route_density(
+    _db: DatabaseConnection,
+    date_range: tuple[date, date],
+    tr_types: list[str] | None = None,
+) -> DataFrame:
+    """
+    Get ridership density (rides per vehicle) for top routes.
+    """
+    return _get_data_with_filters(
+        db=_db,
+        sql_query=SQL_ROUTE_DENSITY,
         date_range=date_range,
         tr_types=tr_types,
     )

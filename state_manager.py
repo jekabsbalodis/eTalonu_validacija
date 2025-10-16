@@ -10,9 +10,12 @@ from streamlit.runtime.state.session_state_proxy import SessionStateProxy
 from data_manager import (
     get_available_months,
     get_available_tr_types,
+    get_peak_day,
     get_peak_hour,
     get_popular_routes,
+    get_route_density,
     get_total_rides,
+    get_tr_distribution,
 )
 from database import DatabaseConnection
 from utils import last_day_of_month
@@ -38,6 +41,9 @@ class MetricsKeys(str, Enum):
     TOTAL_RIDES = 'total_rides'
     PEAK_HOUR = 'peak_hour'
     POPULAR_ROUTES = 'popular_routes'
+    TR_DISTRIBUTION = 'tr_distribution'
+    PEAK_DAY = 'peak_day'
+    ROUTE_DENSITY = 'route_density'
 
 
 def init_state(db: DatabaseConnection, session_state: SessionStateProxy) -> None:
@@ -121,7 +127,26 @@ def update_metrics(
         date_range=date_range,
         tr_types=tr_types,
     )
+
     session_state[StateKeys.METRICS][MetricsKeys.POPULAR_ROUTES] = get_popular_routes(
+        _db=db,
+        date_range=date_range,
+        tr_types=tr_types,
+    )
+
+    session_state[StateKeys.METRICS][MetricsKeys.TR_DISTRIBUTION] = get_tr_distribution(
+        _db=db,
+        date_range=date_range,
+        tr_types=tr_types,
+    )
+
+    session_state[StateKeys.METRICS][MetricsKeys.PEAK_DAY] = get_peak_day(
+        _db=db,
+        date_range=date_range,
+        tr_types=tr_types,
+    )
+
+    session_state[StateKeys.METRICS][MetricsKeys.ROUTE_DENSITY] = get_route_density(
         _db=db,
         date_range=date_range,
         tr_types=tr_types,
