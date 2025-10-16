@@ -38,3 +38,12 @@ def render_sidebar(session_state: SessionStateProxy) -> None:
                 on_click=form_submit,
                 args=(session_state,),
             )
+
+        st.divider()
+
+        st.caption(
+            body="""
+            [Dati no Rīgas Satiksmes](https://data.gov.lv/dati/lv/dataset/e-talonu-validaciju-dati-rigas-satiksme-sabiedriskajos-transportlidzeklos)
+            | [Pirmkods](https://codeberg.org/clear9550/eTalonu_validacija)
+            """
+        )
