@@ -1,0 +1,46 @@
+"""
+Callback functions to pass to streamlit widgets.
+"""
+
+from datetime import date
+
+import streamlit as st
+from streamlit.runtime.state.session_state_proxy import SessionStateProxy
+
+from database import db
+from state_manager import (
+    StateKeys,
+    update_available_tr_types,
+    update_metrics,
+)
+from utils import last_day_of_month
+
+
+def form_submit(session_state: SessionStateProxy) -> None:
+    """
+    Update the session_state values according to selected dates and transport types.
+    """
+    min_date: date = session_state[StateKeys.SELECTED_MONTH]
+    max_date: date = last_day_of_month(min_date)
+    date_range = (min_date, max_date)
+
+    selected_tr_types = session_state[StateKeys.SELECTED_TR_TYPES]
+    if len(selected_tr_types) == 0:
+        st.toast(
+            body='Lūdzu izvēlies vismaz vienu transporta veidu',
+            icon=':material/error:',
+        )
+        return
+
+    update_available_tr_types(
+        db=db,
+        session_state=session_state,
+        date_range=date_range,
+    )
+
+    update_metrics(
+        db=db,
+        session_state=session_state,
+        date_range=date_range,
+        tr_types=selected_tr_types,
+    )
