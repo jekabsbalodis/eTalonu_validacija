@@ -26,7 +26,7 @@ def form_submit(session_state: SessionStateProxy) -> None:
 
     selected_tr_types = session_state[StateKeys.SELECTED_TR_TYPES]
     if len(selected_tr_types) == 0:
-        st.error(
+        st.toast(
             body='Lūdzu izvēlies vismaz vienu transporta veidu',
             icon=':material/error:',
         )
