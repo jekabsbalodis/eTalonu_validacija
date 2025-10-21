@@ -10,6 +10,10 @@ from utils import format_number, format_percent
 # count(*) / count(distinct date(Laiks)) as avg_rides_per_day,
 # date_trunc('month', Laiks) as moy
 
+# sql_rides_per_day
+# count(*) as total_rides,
+# date_trunc('day', Laiks) as dom
+
 # sql_peak_hour
 # count(*) / count(distinct date(Laiks)) as avg_rides_per_hour,
 # hour(Laiks) as hour
@@ -51,25 +55,36 @@ def render_metrics(session_state: SessionStateProxy) -> None:
         )
 
     with col2:
-        df: pl.DataFrame = session_state[StateKeys.METRICS][MetricsKeys.TOTAL_RIDES]
+        df_rides_per_day: pl.DataFrame = session_state[StateKeys.METRICS][
+            MetricsKeys.RIDES_PER_DAY
+        ]
+        df_avg_rides_per_day: pl.DataFrame = session_state[StateKeys.METRICS][
+            MetricsKeys.TOTAL_RIDES
+        ]
 
-        avg_rides = df.get_column('avg_rides_per_day')[-1]
+        rides_per_day = df_rides_per_day.get_column('total_rides')
 
-        avg_rides_per_month = df.get_column('avg_rides_per_day')
+        avg_rides_per_month = df_avg_rides_per_day.get_column('avg_rides_per_day')
 
         try:
             avg_rides_previous = avg_rides_per_month[-2]
         except IndexError:
-            avg_rides_previous = avg_rides
+            avg_rides_previous = avg_rides_per_month[-1]
 
-        delta_avg_rides = (avg_rides - avg_rides_previous) / avg_rides_previous
+        delta_avg_rides = (
+            avg_rides_per_month[-1] - avg_rides_previous
+        ) / avg_rides_previous
 
         st.metric(
             label='Braucienu skaits dienā',
-            help='Vidējais braucienu skaits vienā dienā mēnesī',
-            value=format_number(avg_rides),
+            help="""
+            Vidējais braucienu skaits vienā dienā mēnesī.\n
+            Delta norāda vidējā braucienu skaita dienā izvēlētajā mēnesī atšķirību
+            pret iepriekšējo mēnesi.\n
+            Grafiks norāda braucienu skaitu katrā izēlētā mēneša dienā.""",
+            value=format_number(avg_rides_per_month[-1]),
             border=True,
-            chart_data=avg_rides_per_month,
+            chart_data=rides_per_day,
             chart_type='area',
             delta=format_percent(delta_avg_rides),
             height='stretch',

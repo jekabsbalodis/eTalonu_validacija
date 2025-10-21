@@ -55,6 +55,17 @@ SQL_TOTAL_RIDES: Final[str] = """--sql
     order by moy;
     """
 
+SQL_RIDES_PER_DAY: Final[str] = """--sql
+    select
+        count(*) as total_rides,
+        date_trunc('day', Laiks) as dom
+    from
+        validacijas
+    {where_clause}
+    group by dom
+    order by dom;
+    """
+
 SQL_PEAK_HOUR: Final[str] = """--sql
     with hs as
     (
@@ -249,6 +260,23 @@ def get_total_rides(
         db=_db,
         sql_query=SQL_TOTAL_RIDES,
         up_to_date=up_to_date,
+        tr_types=tr_types,
+    )
+
+
+@st.cache_data(show_spinner=SpinnerMessages.METRICS.value, show_time=True)
+def get_rides_per_day(
+    _db: DatabaseConnection,
+    date_range: tuple[date, date],
+    tr_types: list[str] | None = None,
+) -> DataFrame:
+    """
+    Get count of rides for each day of the selected month.
+    """
+    return _get_data_with_filters(
+        db=_db,
+        sql_query=SQL_RIDES_PER_DAY,
+        date_range=date_range,
         tr_types=tr_types,
     )
 

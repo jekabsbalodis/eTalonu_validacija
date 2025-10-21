@@ -13,6 +13,7 @@ from data_manager import (
     get_peak_day,
     get_peak_hour,
     get_popular_routes,
+    get_rides_per_day,
     get_route_density,
     get_total_rides,
     get_tr_distribution,
@@ -44,6 +45,7 @@ class MetricsKeys(str, Enum):
     TR_DISTRIBUTION = 'tr_distribution'
     PEAK_DAY = 'peak_day'
     ROUTE_DENSITY = 'route_density'
+    RIDES_PER_DAY = 'rides_per_day'
 
 
 def init_state(db: DatabaseConnection, session_state: SessionStateProxy) -> None:
@@ -119,6 +121,12 @@ def update_metrics(
     session_state[StateKeys.METRICS][MetricsKeys.TOTAL_RIDES] = get_total_rides(
         _db=db,
         up_to_date=max_date,
+        tr_types=tr_types,
+    )
+
+    session_state[StateKeys.METRICS][MetricsKeys.RIDES_PER_DAY] = get_rides_per_day(
+        _db=db,
+        date_range=date_range,
         tr_types=tr_types,
     )
 
