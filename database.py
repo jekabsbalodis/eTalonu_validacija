@@ -8,38 +8,31 @@ import duckdb
 import streamlit as st
 
 
-def singleton(cls):
-    """
-    Decorator to create a single instance of a class.
-    """
-    instances = {}
-    lock = threading.Lock()
-
-    def get_instance(*args, **kwargs):
-        """
-        Get the singleton instance of the class.
-        """
-        if cls not in instances:
-            with lock:
-                if cls not in instances:
-                    instances[cls] = cls(*args, **kwargs)
-        return instances[cls]
-
-    return get_instance
-
-
-@singleton
 class DatabaseConnection:
     """
     DuckDB connection wrapper with caching and some utility methods.
     """
 
+    _instance = None
+    _lock = threading.Lock()
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+        return cls._instance
+
     def __init__(self: 'DatabaseConnection', token: str):
         """
         Initialize the DatabaseConnection instance.
         """
+        if getattr(self, '_initialized', False):
+            return
+
         self._conn: duckdb.DuckDBPyConnection | None = None
         self._token = token
+        self._initialized = True
 
     @property
     def conn(self) -> duckdb.DuckDBPyConnection:
