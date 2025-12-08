@@ -1,5 +1,5 @@
 from datetime import date
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 import pytest
 
@@ -62,3 +62,46 @@ def test_form_submit_valid(session_state):
         assert args2['tr_types'] == ['Tramvajs']
 
         mock_toast.assert_not_called()
+
+
+def test_form_submit_missing_selected_month(session_state):
+    """Test form_submit handles missing selected month gracefully"""
+    del session_state[StateKeys.SELECTED_MONTH]
+    session_state[StateKeys.SELECTED_TR_TYPES] = ['Tramvajs']
+
+    with pytest.raises(KeyError):
+        form_submit(session_state=session_state)
+
+
+def test_form_submit_missing_tr_types_key(session_state):
+    """Test form_submit handles missing transport types key"""
+    del session_state[StateKeys.SELECTED_TR_TYPES]
+
+    with pytest.raises(KeyError):
+        form_submit(session_state=session_state)
+
+
+def test_form_submit_leap_year_february(session_state):
+    """Test date range calculation works for February in leap years"""
+    session_state[StateKeys.SELECTED_MONTH] = date(2024, 2, 1)  # Leap year
+    session_state[StateKeys.SELECTED_TR_TYPES] = ['Tramvajs']
+
+    with (
+        patch('callbacks.update_available_tr_types') as mock_update_tr,
+        patch('callbacks.update_metrics') as mock_update_metrics,
+    ):
+        form_submit(session_state=session_state)
+
+        # Should calculate Feb 29 as end date for 2024
+        mock_update_tr.assert_called_once_with(
+            db=ANY,
+            session_state=session_state,
+            date_range=(date(2024, 2, 1), date(2024, 2, 29)),
+        )
+
+        mock_update_metrics.assert_called_once_with(
+            db=ANY,
+            session_state=session_state,
+            date_range=(date(2024, 2, 1), date(2024, 2, 29)),
+            tr_types=['Tramvajs'],
+        )
