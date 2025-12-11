@@ -52,3 +52,6 @@ pythonPlatform = "Windows"
 typeCheckingMode = "off"
 reportUnusedImport = false
 reportUnusedVariable = false
+
+[tool.coverage.run]
+omit = ["tests/*"]

@@ -32,7 +32,7 @@ def format_month_repr(date: date) -> str:
     """
     Format date to show month and year with Latvian locale.
     """
-    return format_date(date, format='MMMM YYYY', locale=_locale)
+    return format_date(date, format='MMMM y', locale=_locale)
 
 
 def format_month_repr_long(date: date) -> str:
