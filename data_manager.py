@@ -215,14 +215,19 @@ def get_available_months(_db: DatabaseConnection) -> list[date]:
     if bounds is None:
         raise ValueError('Datubāzē netika atrasta kolonna "Laiks".')
     start_date, end_date = bounds
+    # Normalize the dates to start of month
+
+    start_date = date(start_date.year, start_date.month, 1)
+    end_date = date(end_date.year, end_date.month, 1)
+
     # Use the min and max value of column 'Laiks' to create a list of months inbetween
-    res = list(
-        rrule(
-            freq=MONTHLY,
-            dtstart=start_date,
-            until=end_date,
-        )
-    )
+    res: list[date] = []
+    for i in rrule(
+        freq=MONTHLY,
+        dtstart=start_date,
+        until=end_date,
+    ):
+        res.append(i.date())
     return res
 
 
