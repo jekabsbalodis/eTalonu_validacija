@@ -55,3 +55,8 @@ reportUnusedVariable = false
 
 [tool.coverage.run]
 omit = ["tests/*"]
+
+source = [
+    ".",
+    "widgets",
+]
