@@ -113,9 +113,9 @@ def render_charts(session_state: SessionStateProxy) -> None:
 
         st.markdown(
             body='Maršruta noslogojums',
-            help="""Vidējais braucienu skaits
-            uz vienu transporta līdzekli katrā maršrutā
-            """,
+            help=(
+                'Vidējais braucienu skaits uz vienu transporta līdzekli katrā maršrutā'
+            ),
         )
 
         route_density_bar_chart = (

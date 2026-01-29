@@ -41,7 +41,12 @@ def render_metrics(session_state: SessionStateProxy) -> None:
             total_rides_previous = total_rides
             # Store the penultimate value as previous month's total rides
 
-        delta_total_rides = (total_rides - total_rides_previous) / total_rides_previous
+        try:
+            delta_total_rides = (
+                total_rides - total_rides_previous
+            ) / total_rides_previous
+        except ZeroDivisionError:
+            delta_total_rides = 0.0
 
         st.metric(
             label='Braucienu skaits mēnesī',
@@ -71,9 +76,12 @@ def render_metrics(session_state: SessionStateProxy) -> None:
         except IndexError:
             avg_rides_previous = avg_rides_per_month[-1]
 
-        delta_avg_rides = (
-            avg_rides_per_month[-1] - avg_rides_previous
-        ) / avg_rides_previous
+        try:
+            delta_avg_rides = (
+                avg_rides_per_month[-1] - avg_rides_previous
+            ) / avg_rides_previous
+        except ZeroDivisionError:
+            delta_avg_rides = 0.0
 
         st.metric(
             label='Braucienu skaits dienā',
@@ -104,7 +112,12 @@ def render_metrics(session_state: SessionStateProxy) -> None:
 
         avg_rides_per_hour = rides_per_hour.median()
 
-        delta_from_avg = (peak_rides.first() - avg_rides_per_hour) / avg_rides_per_hour
+        try:
+            delta_from_avg = (
+                peak_rides.first() - avg_rides_per_hour
+            ) / avg_rides_per_hour
+        except ZeroDivisionError:
+            delta_from_avg = 0.0
 
         st.metric(
             label=f'Aktīvākā stunda: {peak_hour.first()}.00',
