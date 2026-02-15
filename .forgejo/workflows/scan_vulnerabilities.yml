@@ -10,7 +10,7 @@ jobs:
     runs-on: codeberg-tiny-lazy
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Scan vulnerabilities
         uses: docker://aquasec/trivy:latest
