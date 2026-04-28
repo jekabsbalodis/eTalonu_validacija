@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
   "babel>=2.17.0",
-  "duckdb==1.4.4",
+  "duckdb==1.5.2",
   "polars>=1.34.0",
   "python-dateutil>=2.9.0.post0",
   "streamlit>=1.50.0",
@@ -14,9 +14,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-  "basedpyright>=1.31.6",
   "pytest>=8.4.2",
-  "pytest-coverage>=0.0",
+  "pytest-cov>=7.1.0",
   "ruff>=0.13.2",
   "sqlfluff>=3.4.2",
   "tombi>=0.6.17",
@@ -24,13 +23,15 @@ dev = [
 ]
 
 [tool.ruff]
-target-version = "py313"
+target-version = "py314"
 
 [tool.ruff.format]
 quote-style = "single"
 
 [tool.ruff.lint]
 select = [
+  "D",  # pydocstyle
+  "DOC",  # pydoclint
   "E",  # pycodestyle error
   "W",  # pycodestyle warning
   "F",  # pyflakes
@@ -43,15 +44,18 @@ select = [
 ]
 ignore = ["PLR2004", "F821"]
 
+[tool.ruff.lint.per-file-ignores]
+'tests/*' = ["D", "DOC"]
+
+[tool.tombi.files]
+exclude = [".venv/**"]
+
+[tool.ty.environment]
+python-platform = "linux"
+python-version = "3.14"
+
 [tool.sqlfluff.core]
 dialect = "duckdb"
-
-[tool.basedpyright]
-pythonVersion = "3.13"
-pythonPlatform = "Windows"
-typeCheckingMode = "off"
-reportUnusedImport = false
-reportUnusedVariable = false
 
 [tool.coverage.run]
 omit = ["tests/*"]
