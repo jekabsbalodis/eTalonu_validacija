@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
   "babel>=2.17.0",
-  "duckdb==1.5.3",
+  "duckdb==1.5.4",
   "polars>=1.34.0",
   "python-dateutil>=2.9.0.post0",
   "streamlit>=1.50.0",
